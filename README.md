@@ -88,7 +88,7 @@ The provided SoundCloudAuthenticator class makes obtaining an auth token easy.
 To open login:
 
 ```java
-SoundCloudAuthenticator.openLoginActivity(context, clientId, clientSecret);
+SoundCloudAuthenticator.openLoginActivity(context, "clientId", "clientSecret");
 ```
 Login will open in the default phone browser. Once the user has given the application permission to authenticate on their behalf, SoundCloud will redirect to the URI specified by the app. This intent should be filtered by the activity that should obtain the Auth Token.
 
