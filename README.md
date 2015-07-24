@@ -5,7 +5,7 @@ This project is a wrapper for the [SoundCloud Web API](https://developers.soundc
 ## Building
 This project is built using [Gradle](https://gradle.org/):
 
-1. Clone the repository: `git clone https://github.com/lubecjac/soundcloud-web-api-android.git`
+1. Clone the repository: `git clone https://github.com/birdcage/soundcloud-web-api-android.git`
 2. Build: `./gradlew assemble`
 3. Grab the `aar` that can be found in `soundcloud-web-api-android/build/outputs/aar/soundcloud-web-api-android-release.aar` and put it in the `libs` folder in your application
 
@@ -147,7 +147,7 @@ When using Retrofit, errors are returned as [`RetrofitError`](http://square.gith
 ## Help
 
 #### Bugs, Feature requests
-Found a bug? Something that's missing? Feedback is an important part of improving the project, so please [open an issue](https://github.com/lubecjac/soundcloud-web-api-android/issues).
+Found a bug? Something that's missing? Feedback is an important part of improving the project, so please [open an issue](https://github.com/birdcage/soundcloud-web-api-android/issues).
 
 #### Code
 Fork this project and start working on your own feature branch. When you're done, send a Pull Request to have your suggested changes merged into the master branch by the project's collaborators. Read more about the [GitHub flow](https://guides.github.com/introduction/flow/).
