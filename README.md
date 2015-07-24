@@ -42,7 +42,7 @@ in the local repository in the `libs` folder.
 Out of the box, it uses the default [OkHttp](http://square.github.io/okhttp/) client.
 
 ```java
-SoundCloudAPI api = new SoundCloudAPI();
+SoundCloudAPI api = new SoundCloudAPI("clientId");
 
 // Few of the SoundCloud Web API endpoints require authorization.
 // If you know you'll require authorization you can add this step.
