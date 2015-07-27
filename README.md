@@ -32,8 +32,7 @@ dependencies {
 }
 ```
 
-The `repositories` section tells your application to look for the `soundcloud-web-api-android-release.aar`
-in the local repository in the `libs` folder.
+The `repositories` section tells your application to look for the `soundcloud-web-api-android-release.aar` in the local repository in the `libs` folder.
 
 
 
@@ -52,7 +51,7 @@ SoundCloudService soundcloud = api.getService();
 
 soundcloud.getTrack("trackId", new Callback<Track>() {
     @Override
-    public void success(Album album, Response response) {
+    public void success(Track track, Response response) {
         Log.d("Track success", track.title);
     }
 
