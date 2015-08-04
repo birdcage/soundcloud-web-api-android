@@ -1,17 +1,21 @@
 # SoundCloud Web API for Android
 
-This project is a wrapper for the [SoundCloud Web API](https://developers.soundcloud.com/docs/api/reference). It uses [Retrofit](http://square.github.io/retrofit/) to create Java interfaces from API endpoints.
+This project is a wrapper for the [SoundCloud Web API](https://developers.soundcloud.com/docs/api/reference).
+It uses [Retrofit](http://square.github.io/retrofit/) to create Java interfaces from API endpoints.
 
 ## Building
 This project is built using [Gradle](https://gradle.org/):
 
 1. Clone the repository: `git clone https://github.com/birdcage/soundcloud-web-api-android.git`
-2. Build: `./gradlew assemble`
-3. Grab the `aar` that can be found in `soundcloud-web-api-android/build/outputs/aar/soundcloud-web-api-android-release.aar` and put it in the `libs` folder in your application
+2. Open and build the project.
+3. Grab the `aar` that can be found in `soundcloud-web-api-android/build/outputs/aar/soundcloud-web-api-android-release.aar`
+  and put it in the `libs` folder in your application
 
 ## Integration into your project
 
-This project depends on `Retrofit 1.9.0` and `OkHttp 2.4.0`. When you build it, it creates an `aar` that doesn't contain Retrofit and OkHttp files. To make your app work you'll need to include these dependencies in your app's `build.gradle` file.
+This project depends on `Retrofit 1.9.0` and `OkHttp 2.4.0`. When you build it, it creates an `aar`
+that doesn't contain Retrofit and OkHttp files. To make your app work you'll need to include these
+dependencies in your app's `build.gradle` file.
 
 Add following to the `build.gradle` file in your app:
 
@@ -32,7 +36,7 @@ dependencies {
 }
 ```
 
-The `repositories` section tells your application to look for the `soundcloud-web-api-android-release.aar` in the local repository in the `libs` folder.
+Alternatively, the project can be imported into an existing project as a module.
 
 
 
@@ -163,15 +167,12 @@ Fork this project and start working on your own feature branch. When you're done
   
 - /apps
   - List of apps on the SoundCloud apps page.
-  - Not useful in the scope of Birdcage.
   
 - /resolve
   - Resolves SoundCloud web urls to API endpoints.
-  - Not useful in the scope of Birdcage.
   
 - /oembed
   - Creates objects that can be embedded in a web page.
-  - Not useful in the scope of Birdcage.
   
 - /comments
   - No officially documented endpoints.

@@ -7,13 +7,9 @@ package lubecki.soundcloud.webapi.android.models;
  */
 public class AuthenticationResponse {
 
-  // ~~ CONSTANTS ~~
-
   public static final String TOKEN = "access_token";
   public static final String ERROR = "error";
   public static final String UNKNOWN = "unknown";
-
-  // ~~ FIELDS ~~
 
   public String access_token;
 

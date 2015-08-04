@@ -29,12 +29,9 @@ dependencies {
   compile('com.squareup.retrofit:retrofit:1.9.0') {
     transitive = true
   }
-  compile('com.squareup.okhttp:okhttp:2.2.0') {
+  compile('com.squareup.okhttp:okhttp:2.4.0') {
     transitive = true
   }
-
-  testCompile 'junit:junit:4.12'
-  testCompile 'org.mockito:mockito-core:1.9.5'
 }
 
 android.libraryVariants.all { variant ->
@@ -55,5 +52,15 @@ android.libraryVariants.all { variant ->
 
     exclude '**/BuildConfig.java'
     exclude '**/R.java'
+  }
+}
+
+android.libraryVariants.all { variant ->
+  variant.outputs.each { output ->
+    def outputFile = output.outputFile
+    if (outputFile != null && outputFile.name.endsWith('.aar')) {
+      def fileName = "${BASE_NAME}-${VERSION_NAME}.aar"
+      output.outputFile = new File(outputFile.parent, fileName)
+    }
   }
 }

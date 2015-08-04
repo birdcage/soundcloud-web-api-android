@@ -23,10 +23,6 @@ import retrofit.Callback;
 public class Track {
 
   /**
-   * ~~ Fields ~~
-   */
-
-  /**
    * Integer value of a track's ID.
    */
   public String id;
