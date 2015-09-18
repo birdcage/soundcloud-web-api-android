@@ -5,15 +5,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
 
+import com.squareup.okhttp.HttpUrl;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import java.io.IOException;
 import java.util.Date;
 
 import lubecki.soundcloud.webapi.android.models.Track;
 import lubecki.soundcloud.webapi.android.query.Pager;
 import lubecki.soundcloud.webapi.android.query.TrackQuery;
-import retrofit.RequestInterceptor;
-import retrofit.RestAdapter;
-import retrofit.client.OkClient;
-import retrofit.converter.GsonConverter;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
 /**
  * Class which builds a {@link SoundCloudService} to access the SoundCloud API. To make
@@ -42,10 +46,12 @@ public class SoundCloudAPI {
             .registerTypeAdapter(Date.class, new DateTypeAdapter())
             .create();
 
-    RestAdapter adapter = new RestAdapter.Builder().setClient(new OkClient())
-        .setEndpoint(SOUNDCLOUD_API_ENDPOINT)
-        .setRequestInterceptor(new SoundCloudRequestInterceptor())
-        .setConverter(new GsonConverter(gson))
+    OkHttpClient client = new OkHttpClient();
+    client.interceptors().add(new SoundCloudInterceptor());
+
+    Retrofit adapter = new Retrofit.Builder().client(client)
+        .baseUrl(SOUNDCLOUD_API_ENDPOINT)
+        .addConverterFactory(GsonConverterFactory.create(gson))
         .build();
 
     service = adapter.create(SoundCloudService.class);
@@ -69,12 +75,19 @@ public class SoundCloudAPI {
     this.token = token;
   }
 
-  private class SoundCloudRequestInterceptor implements RequestInterceptor {
-    @Override public void intercept(RequestFacade request) {
-      request.addQueryParam("client_id", clientId);
+  private class SoundCloudInterceptor implements Interceptor {
+    @Override public Response intercept(Chain chain) throws IOException {
+
+      Request request = chain.request();
+
+      HttpUrl.Builder builder = request.httpUrl().newBuilder();
+
+      builder.addEncodedQueryParameter("client_id", clientId);
       if (token != null) {
-        request.addQueryParam("oauth_token", token);
+        builder.addEncodedQueryParameter("oauth_token", token);
       }
+
+      return chain.proceed(request);
     }
   }
 }

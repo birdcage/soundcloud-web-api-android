@@ -1,5 +1,6 @@
 package lubecki.soundcloud.webapi.android;
 
+import retrofit.Call;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,7 +20,6 @@ import lubecki.soundcloud.webapi.android.models.Users;
 import lubecki.soundcloud.webapi.android.models.WebProfile;
 import lubecki.soundcloud.webapi.android.models.WebProfiles;
 
-import retrofit.Callback;
 import retrofit.http.Path;
 import retrofit.http.GET;
 import retrofit.http.Query;
@@ -43,9 +43,9 @@ public interface SoundCloudService {
    * Returns {@link Tracks} from a given query.
    *
    * @param query The phrase by which to search for tracks.
-   * @param callback Returns tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks") void searchTracks(@Query("q") String query, Callback<List<Track>> callback);
+  @GET("/tracks") Call searchTracks(@Query("q") String query);
 
   /**
    * Returns {@link Tracks} from a given set of query parameters.
@@ -67,65 +67,61 @@ public interface SoundCloudService {
    * </ul>
    *
    * @param queries {@link HashMap} of query params and corresponding values.
-   * @param callback Returns tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks") void searchTracks(@QueryMap HashMap<String, String> queries,
-      Callback<List<Track>> callback);
+  @GET("/tracks") Call<List<Track>> searchTracks(@QueryMap HashMap<String, String> queries);
 
   /**
    * Get a {@link Track} with a given ID.
    *
    * @param trackId ID of the track to get.
-   * @param callback Returns a track.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}") void getTrack(@Path("id") String trackId, Callback<Track> callback);
+  @GET("/tracks/{id}") Call<Track> getTrack(@Path("id") String trackId);
 
   /**
    * Get {@link Comments} for a given track ID.
    *
    * @param trackId ID of track.
-   * @param callback Returns the list of comments..
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}/comments") void getTrackComments(@Path("id") String trackId,
-      Callback<List<Comment>> callback);
+  @GET("/tracks/{id}/comments") Call<List<Comment>> getTrackComments(@Path("id") String trackId);
 
   /**
    * Get a {@link Comment} for a given track.
    *
    * @param trackId ID of track containing the comment.
    * @param commentId ID of the comment.
-   * @param callback Returns the comment.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}/comments/{comment-id}") void getTrackComment(@Path("id") String trackId,
-      @Path("comment-id") String commentId, Callback<Comment> callback);
+  @GET("/tracks/{id}/comments/{comment-id}") Call<Comment> getTrackComment(
+      @Path("id") String trackId, @Path("comment-id") String commentId);
 
   /**
    * Returns a {@link Users} who favorited a track.
    *
    * @param trackId of the track to get favoriters from.
-   * @param callback Returns the favoriters.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}/favoriters") void getTrackFavoriters(@Path("id") String trackId,
-      Callback<List<User>> callback);
+  @GET("/tracks/{id}/favoriters") Call<List<User>> getTrackFavoriters(@Path("id") String trackId);
 
   /**
    * Returns a {@link User} with a given ID who favorited a track with a given ID.
    *
    * @param trackId ID of the track to get the favoriter from.
    * @param userId ID of the user who favorited the track.
-   * @param callback Returns the user who favorited the track.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}/favoriters/{user-id") void getTrackFavoriter(@Path("id") String trackId,
-      @Path("user-id") String userId, Callback<User> callback);
+  @GET("/tracks/{id}/favoriters/{user-id") Call<User> getTrackFavoriter(@Path("id") String trackId,
+      @Path("user-id") String userId);
 
   /**
    * Returns the secret token of a track for a given track ID.
    *
    * @param trackId ID of the track that contains the secret token.
-   * @param callback Returns the secret token.
+   * @return The call that can be used to get the data.
    */
-  @GET("/tracks/{id}/secret-token") void getTrackSecret(@Path("id") String trackId,
-      Callback<SecretToken> callback);
+  @GET("/tracks/{id}/secret-token") Call<SecretToken> getTrackSecret(@Path("id") String trackId);
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -139,119 +135,112 @@ public interface SoundCloudService {
    * Returns a list of {@link Users} from a given query.
    *
    * @param query The phrase by which to search for users.
-   * @param callback Returns the list of users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users") void searchUsers(@Query("q") String query, Callback<List<User>> callback);
+  @GET("/users") Call<List<User>> searchUsers(@Query("q") String query);
 
   /**
    * Gets a {@link User} with a given ID.
    *
    * @param userId ID of the user.
-   * @param callback Returns the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}") void getUser(@Path("id") String userId, Callback<User> callback);
+  @GET("/users/{id}") Call<User> getUser(@Path("id") String userId);
 
   /**
    * Returns {@link Tracks} for a user with a given ID.
    *
    * @param userId ID for the user to get tracks for.
-   * @param callback Returns the tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/tracks") void getUserTracks(@Path("id") String userId,
-      Callback<List<Track>> callback);
+  @GET("/users/{id}/tracks") Call<List<Track>> getUserTracks(@Path("id") String userId);
 
   /**
    * Returns {@link Playlists} for a user with a given ID.
    *
    * @param userId ID for the user to get playlists for.
-   * @param callback Returns the playlists.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/playlists") void getUserPlaylists(@Path("id") String userId,
-      Callback<List<Playlist>> callback);
+  @GET("/users/{id}/playlists") Call<List<Playlist>> getUserPlaylists(@Path("id") String userId);
 
   /**
    * Returns {@link Users} followed by a user with a given ID.
    *
    * @param userId ID of the user to get the followings for.
-   * @param callback Returns the followed users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/followings") void getUserFollowings(@Path("id") String userId,
-      Callback<List<User>> callback);
+  @GET("/users/{id}/followings") Call<List<User>> getUserFollowings(@Path("id") String userId);
 
   /**
    * Returns a {@link User} with a given ID followed by another user with a given ID.
    *
    * @param userId ID of the user to get list of followed users from.
    * @param followedUserId ID of the followed user.
-   * @param callback Returns the followed user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/followings/{following-id}") void getUserFollowing(@Path("id") String userId,
-      @Path("following-id") String followedUserId, Callback<User> callback);
+  @GET("/users/{id}/followings/{following-id}") Call<User> getUserFollowing(
+      @Path("id") String userId, @Path("following-id") String followedUserId);
 
   /**
    * Returns {@link Users} followed by a user with a given ID.
    *
    * @param userId ID of a user to get the followers for.
-   * @param callback Returns the list of users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/followers") void getUserFollowers(@Path("id") String userId,
-      Callback<List<User>> callback);
+  @GET("/users/{id}/followers") Call<List<User>> getUserFollowers(@Path("id") String userId);
 
   /**
    * Returns a {@link User} followed by a user with a given ID.
    *
    * @param userId ID of the user to get the follower for.
    * @param followerId ID of the follower.
-   * @param callback Returns the follower with the specified ID.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/followers/{follower-id}") void getUserFollower(@Path("id") String userId,
-      @Path("follower-id") String followerId, Callback<User> callback);
+  @GET("/users/{id}/followers/{follower-id}") Call<User> getUserFollower(@Path("id") String userId,
+      @Path("follower-id") String followerId);
 
   /**
    * Returns {@link Comments} for a user with a given ID.
    *
    * @param userId ID of the user to get comments for.
-   * @param callback Returns the comments for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/comments") void getUserComments(@Path("id") String userId,
-      Callback<List<Comment>> callback);
+  @GET("/users/{id}/comments") Call<List<Comment>> getUserComments(@Path("id") String userId);
 
   /**
    * Returns favorited {@link Tracks} for a user with a given ID.
    *
    * @param userId ID of the user to get favorites for.
-   * @param callback Returns the favorited tracks for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/favorites") void getUserFavorites(@Path("id") String userId,
-      Callback<List<Track>> callback);
+  @GET("/users/{id}/favorites") Call<List<Track>> getUserFavorites(@Path("id") String userId);
 
   /**
    * Returns a favorited {@link Track} for a user with a given ID.
    *
    * @param userId ID of the user.
    * @param favoriteId ID of the track in the user's favorites.
-   * @param callback Returns the favorite track for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/favorites/{favorite-id}") void getUserFavorite(@Path("id") String userId,
-      @Path("favorite-id") String favoriteId, Callback<Track> callback);
+  @GET("/users/{id}/favorites/{favorite-id}") Call<Track> getUserFavorite(@Path("id") String userId,
+      @Path("favorite-id") String favoriteId);
 
   /**
    * Returns a {@link Groups} that a user with a given ID is a part of.
    *
    * @param userId ID of the user.
-   * @param callback Returns the user's groups.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/groups") void getUserGroups(@Path("id") String userId,
-      Callback<List<Group>> callback);
+  @GET("/users/{id}/groups") Call<List<Group>> getUserGroups(@Path("id") String userId);
 
   /**
    * Returns {@link WebProfiles} that a user with a given ID is a part of.
    *
    * @param userId ID of the user.
-   * @param callback Returns the user's groups.
+   * @return The call that can be used to get the data.
    */
-  @GET("/users/{id}/web-profiles") void getUserWebProfiles(@Path("id") String userId,
-      Callback<List<WebProfile>> callback);
+  @GET("/users/{id}/web-profiles") Call<List<WebProfile>> getUserWebProfiles(
+      @Path("id") String userId);
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -265,28 +254,27 @@ public interface SoundCloudService {
    * Returns {@link Playlists} based on a given query.
    *
    * @param query The phrase by which to search for playlists.
-   * @param callback Returns the playlists.
+   * @return The call that can be used to get the data.
    */
-  @GET("/playlists") void getPlaylists(@Query("q") String query, Callback<List<Playlist>> callback);
+  @GET("/playlists") Call<List<Playlist>> getPlaylists(@Query("q") String query);
 
   /**
    * Returns {@link Playlists} based on a given query with a representation parameter.
    *
    * @param query The phrase by which to search for playlists.
    * @param representation Accepted values: "compact" or "id"
-   * @param callback Returns the playlists.
+   * @return The call that can be used to get the data.
    */
-  @GET("/playlists") void getPlaylists(@Query("q") String query,
-      @Query("representation") String representation, Callback<List<Playlist>> callback);
+  @GET("/playlists") Call<List<Playlist>> getPlaylists(@Query("q") String query,
+      @Query("representation") String representation);
 
   /**
    * Returns a secret token for a {@link Playlist}.
    *
    * @param id ID of the playlist to get the token for.
-   * @param callback Returns the secret token.
+   * @return The call that can be used to get the data.
    */
-  @GET("/playlists/{id}/secret-token") void getPlaylistSecret(@Path("id") String id,
-      Callback<SecretToken> callback);
+  @GET("/playlists/{id}/secret-token") Call<SecretToken> getPlaylistSecret(@Path("id") String id);
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -300,63 +288,59 @@ public interface SoundCloudService {
    * Returns {@link Groups} based on a given query.
    *
    * @param query The phrase by which to search for groups.
-   * @param callback Returns the groups.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups") void searchGroups(@Query("q") String query, Callback<List<Group>> callback);
+  @GET("/groups") Call<List<Group>> searchGroups(@Query("q") String query);
 
   /**
    * Returns a {@link Group} with a given ID.
    *
    * @param id ID of the group to get.
-   * @param callback Returns the group.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}") void getGroup(@Path("id") String id, Callback<Group> callback);
+  @GET("/groups/{id}") Call<Group> getGroup(@Path("id") String id);
 
   /**
    * Returns {@link Users} that moderate a group with a given ID.
    *
    * @param id ID of the group to get moderators for.
-   * @param callback Returns the moderators.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/moderators") void getGroupModerators(@Path("id") String id,
-      Callback<List<User>> callback);
+  @GET("/groups/{id}/moderators") Call<List<User>> getGroupModerators(@Path("id") String id);
 
   /**
    * Returns {@link Users} that are in a group with a given ID.
    *
    * @param id ID of the group to get members for.
-   * @param callback Returns the members.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/members") void getGroupMembers(@Path("id") String id,
-      Callback<List<User>> callback);
+  @GET("/groups/{id}/members") Call<List<User>> getGroupMembers(@Path("id") String id);
 
   /**
    * Returns {@link Users} that contribute to a group with a given ID.
    *
    * @param id ID of the group to get contributors for.
-   * @param callback Returns the contributors.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/contributors") void getGroupContributors(@Path("id") String id,
-      Callback<List<User>> callback);
+  @GET("/groups/{id}/contributors") Call<List<User>> getGroupContributors(@Path("id") String id);
 
   /**
    * Returns all {@link Users} that are associated with a group with a given ID.
    *
    * @param id ID of the group to get all users for.
-   * @param callback Returns the users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/users") void getGroupUsers(@Path("id") String id,
-      Callback<List<User>> callback);
+  @GET("/groups/{id}/users") Call<List<User>> getGroupUsers(@Path("id") String id);
 
   /**
    * Returns {@link Tracks} that were submitted to a group with a given ID, but have not yet been
    * approved.
    *
    * @param id ID of the group to get pending tracks for.
-   * @param callback Returns the pending tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/pending_tracks") void getGroupPendingTracks(@Path("id") String id,
-      Callback<List<Track>> callback);
+  @GET("/groups/{id}/pending_tracks") Call<List<Track>> getGroupPendingTracks(
+      @Path("id") String id);
 
   /**
    * Returns a {@link Track} that was submitted to a group with a given ID, but has not yet been
@@ -364,29 +348,28 @@ public interface SoundCloudService {
    *
    * @param id ID of the group to get a pending track for.
    * @param trackId ID of the pending track that was submitted to a group.
-   * @param callback Returns the pending tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/pending_tracks/{pending-id}") void getGroupPendingTrack(@Path("id") String id,
-      @Path("pending-id") String trackId, Callback<Track> callback);
+  @GET("/groups/{id}/pending_tracks/{pending-id}") Call<Track> getGroupPendingTrack(
+      @Path("id") String id, @Path("pending-id") String trackId);
 
   /**
    * Returns {@link Tracks} that were contributed to a group with a given ID. For moderators.
    *
    * @param id ID of the group to get pending tracks for.
-   * @param callback Returns the pending tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/contributions") void getGroupContributions(@Path("id") String id,
-      Callback<List<Track>> callback);
+  @GET("/groups/{id}/contributions") Call<List<Track>> getGroupContributions(@Path("id") String id);
 
   /**
    * Returns a {@link Track} that was contributed to a group with a given ID. For moderators.
    *
    * @param id ID of the group to get a contribution for.
    * @param trackId ID of the contribution.
-   * @param callback Returns the contribution.
+   * @return The call that can be used to get the data.
    */
-  @GET("/groups/{id}/pending_tracks/{contribution-id}") void getGroupContribution(
-      @Path("id") String id, @Path("contribution-id") String trackId, Callback<Track> callback);
+  @GET("/groups/{id}/pending_tracks/{contribution-id}") Call<Track> getGroupContribution(
+      @Path("id") String id, @Path("contribution-id") String trackId);
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -399,105 +382,105 @@ public interface SoundCloudService {
   /**
    * Gets the authenticated {@link User}.
    *
-   * @param callback Returns the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me") void getMe(Callback<User> callback);
+  @GET("/me") Call<User> getMe();
 
   /**
    * Returns {@link Tracks} for the authenticated user.
    *
-   * @param callback Returns the tracks.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/tracks") void getMyTracks(Callback<List<Track>> callback);
+  @GET("/me/tracks") Call<List<Track>> getMyTracks();
 
   /**
    * Returns {@link Playlists} for the authenticated user.
    *
-   * @param callback Returns the playlists.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/playlists") void getMyPlaylists(Callback<List<Playlist>> callback);
+  @GET("/me/playlists") Call<List<Playlist>> getMyPlaylists();
 
   /**
    * Returns {@link Users} followed by the authenticated user.
    *
-   * @param callback Returns the followed users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/followings") void getMyFollowings(Callback<User> callback);
+  @GET("/me/followings") Call<List<User>> getMyFollowings();
 
   /**
    * Returns a {@link User} followed by the authenticated user.
    *
    * @param followedUserId ID of the followed user.
-   * @param callback Returns the followed user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/followings/{following-id}") void getMyFollowing(
-      @Path("following-id") String followedUserId, Callback<User> callback);
+  @GET("/me/followings/{following-id}") Call<User> getMyFollowing(
+      @Path("following-id") String followedUserId);
 
   /**
    * Returns {@link Users} followed by the authenticated user.
    *
-   * @param callback Returns the list of users.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/followers") void getMyFollowers(Callback<List<User>> callback);
+  @GET("/me/followers") Call<List<User>> getMyFollowers();
 
   /**
    * Returns a {@link User} followed by the authenticated user.
    *
    * @param followerId ID of the follower.
-   * @param callback Returns the follower with the specified ID.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/followers/{follower-id}") void getMyFollower(@Path("follower-id") String followerId,
-      Callback<User> callback);
+  @GET("/me/followers/{follower-id}") Call<User> getMyFollower(
+      @Path("follower-id") String followerId);
 
   /**
    * Returns {@link Comments} for the authenticated user.
    *
-   * @param callback Returns the comments for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/comments") void getMyComments(Callback<List<Comment>> callback);
+  @GET("/me/comments") Call<List<Comment>> getMyComments();
 
   /**
    * Returns favorited {@link Tracks} for the authenticated user.
    *
-   * @param callback Returns the favorited tracks for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/favorites") void getMyFavorites(Callback<List<Track>> callback);
+  @GET("/me/favorites") Call<List<Track>> getMyFavorites();
 
   /**
    * Returns a favorited {@link Track} for the authenticated user.
    *
    * @param favoriteId ID of the track in the user's favorites.
-   * @param callback Returns the favorite track for the user.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/favorites/{favorite-id}") void getMyFavorite(@Path("favorite-id") String favoriteId,
-      Callback<Track> callback);
+  @GET("/me/favorites/{favorite-id}") Call<List<Track>> getMyFavorite(
+      @Path("favorite-id") String favoriteId);
 
   /**
    * Returns a list of groups that the authenticated user is a part of.
    *
-   * @param callback Returns the user's groups.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/groups") void getMyGroups(Callback<List<Group>> callback);
+  @GET("/me/groups") Call<List<Group>> getMyGroups();
 
   /**
    * Returns a list of web profiles that the authenticated user has.
    *
-   * @param callback Returns the user's web profiles.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/web-profiles") void getMyWebProfiles(Callback<List<WebProfile>> callback);
+  @GET("/me/web-profiles") Call<List<WebProfile>> getMyWebProfiles();
 
   /**
    * Returns {@link Connections} for the authenticated user.
    *
-   * @param callback Returns the connections.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/connections") void getMyConnections(Callback<List<Connection>> callback);
+  @GET("/me/connections") Call<List<Connection>> getMyConnections();
 
   /**
    * Returns a {@link Connection} for the authenticated user.
    *
    * @param connectionId ID of the connection.
-   * @param callback Returns the connection.
+   * @return The call that can be used to get the data.
    */
-  @GET("/me/connections") void getMyConnection(String connectionId, Callback<Connection> callback);
+  @GET("/me/connections") Call<Connection> getMyConnection(String connectionId);
 }

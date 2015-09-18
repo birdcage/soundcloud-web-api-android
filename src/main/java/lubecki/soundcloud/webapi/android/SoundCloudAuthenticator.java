@@ -9,8 +9,7 @@ import com.squareup.okhttp.OkHttpClient;
 import lubecki.soundcloud.webapi.android.models.AuthenticationResponse;
 import lubecki.soundcloud.webapi.android.models.Authenticator;
 import retrofit.Callback;
-import retrofit.RestAdapter;
-import retrofit.client.OkClient;
+import retrofit.Retrofit;
 import retrofit.http.Body;
 import retrofit.http.POST;
 
@@ -48,10 +47,8 @@ public class SoundCloudAuthenticator {
    */
   public static AuthService getAuthService() {
     if (service == null) {
-      RestAdapter adapter = new RestAdapter.Builder().setClient(new OkClient(new OkHttpClient()))
-          .setEndpoint(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT)
-          .setLogLevel(RestAdapter.LogLevel.FULL)
-          .build();
+      Retrofit adapter =
+          new Retrofit.Builder().baseUrl(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT).build();
 
       service = adapter.create(AuthService.class);
     }
@@ -62,7 +59,8 @@ public class SoundCloudAuthenticator {
   /**
    * Describes the method used to give the app permission to make authenticated requests.
    *
-   * @see <a href="https://developers.soundcloud.com/docs/api/reference#connect">Connect Reference</a>
+   * @see <a href="https://developers.soundcloud.com/docs/api/reference#connect">Connect
+   * Reference</a>
    * @see <a href="https://developers.soundcloud.com/docs/api/reference#token">OAuth Reference</a>
    */
   public class GrantType {
@@ -80,7 +78,8 @@ public class SoundCloudAuthenticator {
 
   /**
    * Launches an external browser so a user can give the app access. If configured properly,
-   * the user will return to the app and then {@link #handleResponse(Intent, String, String, String)}
+   * the user will return to the app and then {@link #handleResponse(Intent, String, String,
+   * String)}
    * can be used with {@link AuthService#authorize(Authenticator, Callback)}
    * to obtain an Auth Token.
    *
