@@ -1,6 +1,7 @@
 package lubecki.soundcloud.webapi.android;
 
 import java.util.HashMap;
+import java.util.List;
 
 import lubecki.soundcloud.webapi.android.models.Comment;
 import lubecki.soundcloud.webapi.android.models.Comments;
@@ -27,6 +28,7 @@ import retrofit.http.QueryMap;
 /**
  * Contains methods to access the SoundCloud API.
  */
+@SuppressWarnings("unused") //
 public interface SoundCloudService {
 
   /**
@@ -43,7 +45,7 @@ public interface SoundCloudService {
    * @param query The phrase by which to search for tracks.
    * @param callback Returns tracks.
    */
-  @GET("/tracks") void searchTracks(@Query("q") String query, Callback<Track[]> callback);
+  @GET("/tracks") void searchTracks(@Query("q") String query, Callback<List<Track>> callback);
 
   /**
    * Returns {@link Tracks} from a given set of query parameters.
@@ -51,8 +53,8 @@ public interface SoundCloudService {
    * <ul>
    * <li>q - string to search for</li>
    * <li>tags - comma separated list of tags to search for</li>
-   * <li>filter - described by {@link Track}.Filter</li>
-   * <li>license - described by {@link Track}.License</li>
+   * <li>filter - described by Track.Filter</li>
+   * <li>license - described by Track.License</li>
    * <li>bpm[from] - minimum bpm of results</li>
    * <li>bpm[to] - maximum bpm of results</li>
    * <li>duration[from] - minimum duration of results, in milliseconds</li>
@@ -61,14 +63,14 @@ public interface SoundCloudService {
    * <li>created_at[to] - latest date of results, format: "yyyy-mm-dd hh:mm:ss"</li>
    * <li>ids - comma separated list of tracks ids</li>
    * <li>genres - comma separated list of genres</li>
-   * <li>types - comma separated list of types described by {@link Track}.Type</li>
+   * <li>types - comma separated list of types described by Track.Type</li>
    * </ul>
    *
    * @param queries {@link HashMap} of query params and corresponding values.
    * @param callback Returns tracks.
    */
   @GET("/tracks") void searchTracks(@QueryMap HashMap<String, String> queries,
-      Callback<Track[]> callback);
+      Callback<List<Track>> callback);
 
   /**
    * Get a {@link Track} with a given ID.
@@ -85,7 +87,7 @@ public interface SoundCloudService {
    * @param callback Returns the list of comments..
    */
   @GET("/tracks/{id}/comments") void getTrackComments(@Path("id") String trackId,
-      Callback<Comment[]> callback);
+      Callback<List<Comment>> callback);
 
   /**
    * Get a {@link Comment} for a given track.
@@ -104,7 +106,7 @@ public interface SoundCloudService {
    * @param callback Returns the favoriters.
    */
   @GET("/tracks/{id}/favoriters") void getTrackFavoriters(@Path("id") String trackId,
-      Callback<Users[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns a {@link User} with a given ID who favorited a track with a given ID.
@@ -139,7 +141,7 @@ public interface SoundCloudService {
    * @param query The phrase by which to search for users.
    * @param callback Returns the list of users.
    */
-  @GET("/users") void serachUsers(@Query("q") String query, Callback<User[]> callback);
+  @GET("/users") void searchUsers(@Query("q") String query, Callback<List<User>> callback);
 
   /**
    * Gets a {@link User} with a given ID.
@@ -156,7 +158,7 @@ public interface SoundCloudService {
    * @param callback Returns the tracks.
    */
   @GET("/users/{id}/tracks") void getUserTracks(@Path("id") String userId,
-      Callback<Track[]> callback);
+      Callback<List<Track>> callback);
 
   /**
    * Returns {@link Playlists} for a user with a given ID.
@@ -165,7 +167,7 @@ public interface SoundCloudService {
    * @param callback Returns the playlists.
    */
   @GET("/users/{id}/playlists") void getUserPlaylists(@Path("id") String userId,
-      Callback<Playlist[]> callback);
+      Callback<List<Playlist>> callback);
 
   /**
    * Returns {@link Users} followed by a user with a given ID.
@@ -174,7 +176,7 @@ public interface SoundCloudService {
    * @param callback Returns the followed users.
    */
   @GET("/users/{id}/followings") void getUserFollowings(@Path("id") String userId,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns a {@link User} with a given ID followed by another user with a given ID.
@@ -193,7 +195,7 @@ public interface SoundCloudService {
    * @param callback Returns the list of users.
    */
   @GET("/users/{id}/followers") void getUserFollowers(@Path("id") String userId,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns a {@link User} followed by a user with a given ID.
@@ -212,7 +214,7 @@ public interface SoundCloudService {
    * @param callback Returns the comments for the user.
    */
   @GET("/users/{id}/comments") void getUserComments(@Path("id") String userId,
-      Callback<Comment[]> callback);
+      Callback<List<Comment>> callback);
 
   /**
    * Returns favorited {@link Tracks} for a user with a given ID.
@@ -221,7 +223,7 @@ public interface SoundCloudService {
    * @param callback Returns the favorited tracks for the user.
    */
   @GET("/users/{id}/favorites") void getUserFavorites(@Path("id") String userId,
-      Callback<Track[]> callback);
+      Callback<List<Track>> callback);
 
   /**
    * Returns a favorited {@link Track} for a user with a given ID.
@@ -240,7 +242,7 @@ public interface SoundCloudService {
    * @param callback Returns the user's groups.
    */
   @GET("/users/{id}/groups") void getUserGroups(@Path("id") String userId,
-      Callback<Group[]> callback);
+      Callback<List<Group>> callback);
 
   /**
    * Returns {@link WebProfiles} that a user with a given ID is a part of.
@@ -249,7 +251,7 @@ public interface SoundCloudService {
    * @param callback Returns the user's groups.
    */
   @GET("/users/{id}/web-profiles") void getUserWebProfiles(@Path("id") String userId,
-      Callback<WebProfile[]> callback);
+      Callback<List<WebProfile>> callback);
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -265,7 +267,7 @@ public interface SoundCloudService {
    * @param query The phrase by which to search for playlists.
    * @param callback Returns the playlists.
    */
-  @GET("/playlists") void getPlaylists(@Query("q") String query, Callback<Playlist[]> callback);
+  @GET("/playlists") void getPlaylists(@Query("q") String query, Callback<List<Playlist>> callback);
 
   /**
    * Returns {@link Playlists} based on a given query with a representation parameter.
@@ -275,7 +277,7 @@ public interface SoundCloudService {
    * @param callback Returns the playlists.
    */
   @GET("/playlists") void getPlaylists(@Query("q") String query,
-      @Query("representation") String representation, Callback<Playlist[]> callback);
+      @Query("representation") String representation, Callback<List<Playlist>> callback);
 
   /**
    * Returns a secret token for a {@link Playlist}.
@@ -300,7 +302,7 @@ public interface SoundCloudService {
    * @param query The phrase by which to search for groups.
    * @param callback Returns the groups.
    */
-  @GET("/groups") void searchGroups(@Query("q") String query, Callback<Group[]> callback);
+  @GET("/groups") void searchGroups(@Query("q") String query, Callback<List<Group>> callback);
 
   /**
    * Returns a {@link Group} with a given ID.
@@ -317,7 +319,7 @@ public interface SoundCloudService {
    * @param callback Returns the moderators.
    */
   @GET("/groups/{id}/moderators") void getGroupModerators(@Path("id") String id,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns {@link Users} that are in a group with a given ID.
@@ -326,7 +328,7 @@ public interface SoundCloudService {
    * @param callback Returns the members.
    */
   @GET("/groups/{id}/members") void getGroupMembers(@Path("id") String id,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns {@link Users} that contribute to a group with a given ID.
@@ -335,7 +337,7 @@ public interface SoundCloudService {
    * @param callback Returns the contributors.
    */
   @GET("/groups/{id}/contributors") void getGroupContributors(@Path("id") String id,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns all {@link Users} that are associated with a group with a given ID.
@@ -344,7 +346,7 @@ public interface SoundCloudService {
    * @param callback Returns the users.
    */
   @GET("/groups/{id}/users") void getGroupUsers(@Path("id") String id,
-      Callback<User[]> callback);
+      Callback<List<User>> callback);
 
   /**
    * Returns {@link Tracks} that were submitted to a group with a given ID, but have not yet been
@@ -354,7 +356,7 @@ public interface SoundCloudService {
    * @param callback Returns the pending tracks.
    */
   @GET("/groups/{id}/pending_tracks") void getGroupPendingTracks(@Path("id") String id,
-      Callback<Track[]> callback);
+      Callback<List<Track>> callback);
 
   /**
    * Returns a {@link Track} that was submitted to a group with a given ID, but has not yet been
@@ -374,7 +376,7 @@ public interface SoundCloudService {
    * @param callback Returns the pending tracks.
    */
   @GET("/groups/{id}/contributions") void getGroupContributions(@Path("id") String id,
-      Callback<Track[]> callback);
+      Callback<List<Track>> callback);
 
   /**
    * Returns a {@link Track} that was contributed to a group with a given ID. For moderators.
@@ -385,7 +387,6 @@ public interface SoundCloudService {
    */
   @GET("/groups/{id}/pending_tracks/{contribution-id}") void getGroupContribution(
       @Path("id") String id, @Path("contribution-id") String trackId, Callback<Track> callback);
-
 
   /**
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -407,14 +408,14 @@ public interface SoundCloudService {
    *
    * @param callback Returns the tracks.
    */
-  @GET("/me/tracks") void getMyTracks(Callback<Track[]> callback);
+  @GET("/me/tracks") void getMyTracks(Callback<List<Track>> callback);
 
   /**
    * Returns {@link Playlists} for the authenticated user.
    *
    * @param callback Returns the playlists.
    */
-  @GET("/me/playlists") void getMyPlaylists(Callback<Playlist[]> callback);
+  @GET("/me/playlists") void getMyPlaylists(Callback<List<Playlist>> callback);
 
   /**
    * Returns {@link Users} followed by the authenticated user.
@@ -437,7 +438,7 @@ public interface SoundCloudService {
    *
    * @param callback Returns the list of users.
    */
-  @GET("/me/followers") void getMyFollowers(Callback<User[]> callback);
+  @GET("/me/followers") void getMyFollowers(Callback<List<User>> callback);
 
   /**
    * Returns a {@link User} followed by the authenticated user.
@@ -453,14 +454,14 @@ public interface SoundCloudService {
    *
    * @param callback Returns the comments for the user.
    */
-  @GET("/me/comments") void getMyComments(Callback<Comment[]> callback);
+  @GET("/me/comments") void getMyComments(Callback<List<Comment>> callback);
 
   /**
    * Returns favorited {@link Tracks} for the authenticated user.
    *
    * @param callback Returns the favorited tracks for the user.
    */
-  @GET("/me/favorites") void getMyFavorites(Callback<Track[]> callback);
+  @GET("/me/favorites") void getMyFavorites(Callback<List<Track>> callback);
 
   /**
    * Returns a favorited {@link Track} for the authenticated user.
@@ -476,21 +477,21 @@ public interface SoundCloudService {
    *
    * @param callback Returns the user's groups.
    */
-  @GET("/me/groups") void getMyGroups(Callback<Group[]> callback);
+  @GET("/me/groups") void getMyGroups(Callback<List<Group>> callback);
 
   /**
    * Returns a list of web profiles that the authenticated user has.
    *
    * @param callback Returns the user's web profiles.
    */
-  @GET("/me/web-profiles") void getMyWebProfiles(Callback<WebProfile[]> callback);
+  @GET("/me/web-profiles") void getMyWebProfiles(Callback<List<WebProfile>> callback);
 
   /**
    * Returns {@link Connections} for the authenticated user.
    *
    * @param callback Returns the connections.
    */
-  @GET("/me/connections") void getMyConnections(Callback<Connection[]> callback);
+  @GET("/me/connections") void getMyConnections(Callback<List<Connection>> callback);
 
   /**
    * Returns a {@link Connection} for the authenticated user.

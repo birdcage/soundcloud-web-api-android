@@ -7,6 +7,9 @@ import com.google.gson.internal.bind.DateTypeAdapter;
 
 import java.util.Date;
 
+import lubecki.soundcloud.webapi.android.models.Track;
+import lubecki.soundcloud.webapi.android.query.Pager;
+import lubecki.soundcloud.webapi.android.query.TrackQuery;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.client.OkClient;

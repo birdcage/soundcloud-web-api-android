@@ -1,9 +1,7 @@
 package lubecki.soundcloud.webapi.android.models;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.HashMap;
-
 import lubecki.soundcloud.webapi.android.SoundCloudService;
 import retrofit.Callback;
 
@@ -18,8 +16,9 @@ import retrofit.Callback;
  * </ul>
  *
  * @see <a href="https://developers.soundcloud.com/docs/api/reference#tracks">
- *   SoundCloud Track Reference</a>
+ * SoundCloud Track Reference</a>
  */
+@SuppressWarnings("unused")
 public class Track {
 
   /**
@@ -44,14 +43,7 @@ public class Track {
   public String sharing;
 
   /**
-   * Possible values:
-   * <ul>
-   * <li>{@link EmbeddableBy#ALL}</li>
-   * <li>{@link EmbeddableBy#ME}</li>
-   * <li>{@link EmbeddableBy#NONE}</li>
-   * </ul>
-   *
-   * @see EmbeddableBy
+   * {@link EmbeddableBy}
    */
   public String embeddable_by;
 
@@ -236,14 +228,6 @@ public class Track {
   public boolean user_favorite;
 
   /**
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   *
-   *                                    ~~ Possible Values ~~
-   *
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   */
-
-  /**
    * <ul>
    * <li>ALL_RIGHTS_RESERVED - no sharing</li>
    * <li>NO_RIGHTS_RESERVED - share with everyone</li>
@@ -251,25 +235,35 @@ public class Track {
    * <li>NONCOMMERCIAL - Distribute, display, etc. allowed for noncommercial use</li>
    * <li>NO_DERIVATIVES - Copy, distribution, etc. allowed for the original work only</li>
    * <li>
-   *   SHARE_ALIKE - Allow distribution of derivative works under license identical to original
+   * SHARE_ALIKE - Allow distribution of derivative works under license identical to original
    * </li>
    * </ul>
    *
    * @see <a href="https://developers.soundcloud.com/docs/api/reference#license">License
    * Reference</a>
-   * @see
-   * <a href="http://help.soundcloud.com/customer/portal/articles/243852-what-is-creative-commons-">
-   *   CreativeCommons Reference</a>
+   * @see <a href="http://help.soundcloud.com/customer/portal/articles/243852-what-is-creative-commons-">
+   * CreativeCommons Reference</a>
    */
-  public static class License {
-    public static final String ALL_RIGHTS_RESERVED = "all-rights-reserved";
-    public static final String NO_RIGHTS_RESERVED = "no-rights-reserved";
-    public static final String CC_ATTRIBUTION = "cc-by";
-    public static final String CC_ATTRIBUTION_NONCOMMERCIAL = "cc-by-nc";
-    public static final String CC_ATTRIBUTION_NO_DERIVATIVES = "cc-by-nd";
-    public static final String CC_ATTRIBUTION_SHARE_ALIKE = "cc-by-sa";
-    public static final String CC_ATTRIBUTION_NONCOMMERCIAL_NO_DERIVATES = "cc-by-nc-nd";
-    public static final String CC_ATTRIBUTION_NONCOMMERCIAL_SHARE_ALIKE = "cc-by-nc-sa";
+  public enum License {
+
+    ALL_RIGHTS_RESERVED("all-rights-reserved"),
+    NO_RIGHTS_RESERVED("no-rights-reserved"),
+    CC_ATTRIBUTION("cc-by"),
+    CC_ATTRIBUTION_NONCOMMERCIAL("cc-by-nc"),
+    CC_ATTRIBUTION_NO_DERIVATIVES("cc-by-nd"),
+    CC_ATTRIBUTION_SHARE_ALIKE("cc-by-sa"),
+    CC_ATTRIBUTION_NONCOMMERCIAL_NO_DERIVATES("cc-by-nc-nd"),
+    CC_ATTRIBUTION_NONCOMMERCIAL_SHARE_ALIKE("cc-by-nc-sa");
+
+    private final String license;
+
+    License(String license) {
+      this.license = license;
+    }
+
+    @Override public String toString() {
+      return license;
+    }
   }
 
   /**
@@ -278,20 +272,31 @@ public class Track {
    * @see <a href="https://developers.soundcloud.com/docs/api/reference#track_type">Track Type
    * Reference</a>
    */
-  public static class Type {
-    public static final String ORIGINAL = "original";
-    public static final String REMIX = "remix";
-    public static final String LIVE = "live";
-    public static final String RECORDING = "recording";
-    public static final String SPOKEN = "spoken";
-    public static final String PODCAST = "podcast";
-    public static final String DEMO = "demo";
-    public static final String IN_PROGRESS = "in progress";
-    public static final String STEM = "stem";
-    public static final String LOOP = "loop";
-    public static final String SOUND_EFFECT = "sound effect";
-    public static final String SAMPLE = "sample";
-    public static final String OTHER = "other";
+  public enum Type {
+
+    ORIGINAL("original"),
+    REMIX("remix"),
+    LIVE("live"),
+    RECORDING("recording"),
+    SPOKEN("spoken"),
+    PODCAST("podcast"),
+    DEMO("demo"),
+    IN_PROGRESS("in progress"),
+    STEM("stem"),
+    LOOP("loop"),
+    SOUND_EFFECT("sound effect"),
+    SAMPLE("sample"),
+    OTHER("other");
+    
+    private final String type;
+    
+    Type(String type) {
+      this.type = type;
+    }
+
+    @Override public String toString() {
+      return type;
+    }
   }
 
   /**
@@ -299,28 +304,59 @@ public class Track {
    *
    * @see <a href="https://developers.soundcloud.com/docs/api/reference#state">State Reference</a>
    */
-  public static class State {
-    public static final String PROCESSING = "processing";
-    public static final String FAILED = "failed";
-    public static final String FINISHED = "finished";
+  public enum State {
+
+    PROCESSING("processing"),
+    FAILED("failed"),
+    FINISHED("finished");
+    
+    private final String state;
+    
+    State(String state) {
+      this.state = state;
+    }
+    
+    @Override public String toString() {
+      return state;
+    }
   }
 
   /**
    * Only for use with {@link SoundCloudService#searchTracks(HashMap, Callback)}.
    * Filters tracks by visibility on site.
    */
-  public static class Filter {
-    public static final String ALL = "all";
-    public static final String PUBLIC = "public";
-    public static final String PRIVATE = "private";
+  public enum Filter {
+    ALL("all"),
+    PUBLIC("public"),
+    PRIVATE("private");
+
+    private final String filter;
+
+    Filter(String filter) {
+      this.filter = filter;
+    }
+
+    @Override public String toString() {
+      return filter;
+    }
   }
 
   /**
    * Describes who has permission to embed a track.
    */
-  public static class EmbeddableBy {
-    public static final String ALL = "all";
-    public static final String ME = "me";
-    public static final String NONE = "none";
+  public enum EmbeddableBy {
+    ALL("all"),
+    ME("me"),
+    NONE("none");
+
+    private final String embeddableBy;
+
+    EmbeddableBy(String embeddableBy) {
+      this.embeddableBy = embeddableBy;
+    }
+
+    @Override public String toString() {
+      return embeddableBy;
+    }
   }
 }
