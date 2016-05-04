@@ -28,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    compile(name:'soundcloud-web-api-android-release', ext:'aar')
+    compile(name:'soundcloud-web-api-android-1.0.0', ext:'aar')
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.squareup.okhttp:okhttp:2.4.0'
 
@@ -157,6 +157,10 @@ For information on client ID, secret, and the redirect URI, see the [SoundCloud 
 
 When using Retrofit, errors are returned as [`RetrofitError`](http://square.github.io/retrofit/javadoc/retrofit/RetrofitError.html)
 objects. These objects contain HTTP status codes and their descriptions, for example `400 - Bad Request`.
+
+## License
+
+This project is distributed as open source software under the MIT License. Please see the LICENSE file for more info.
 
 ## Help
 

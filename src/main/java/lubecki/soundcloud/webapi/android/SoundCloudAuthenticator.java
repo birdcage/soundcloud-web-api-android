@@ -1,16 +1,41 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Jacob Lubecki
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package lubecki.soundcloud.webapi.android;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.squareup.okhttp.OkHttpClient;
-
+import java.util.HashMap;
+import java.util.Map;
 import lubecki.soundcloud.webapi.android.models.AuthenticationResponse;
 import lubecki.soundcloud.webapi.android.models.Authenticator;
 import retrofit.Callback;
 import retrofit.Retrofit;
-import retrofit.http.Body;
+import retrofit.http.FieldMap;
+import retrofit.http.FormUrlEncoded;
 import retrofit.http.POST;
 
 /**
@@ -32,16 +57,17 @@ public class SoundCloudAuthenticator {
     /**
      * Asynchronously obtains an OAuth Token.
      *
-     * @param authenticator An {@link Authenticator} with all fields defined.
+     * @param authMap An {@link Map} defining form-urlencoded auth parameters.
      * @param callback A callback to receive the {@link AuthenticationResponse}.
      */
-    @POST("/oauth2/token") void authorize(@Body Authenticator authenticator,
+    @FormUrlEncoded
+    @POST("/oauth2/token") void authorize(@FieldMap Map<String, String> authMap,
         Callback<AuthenticationResponse> callback);
   }
 
   /**
    * Gets the Auth Service so a user can call
-   * {@link AuthService#authorize(Authenticator, Callback)}.
+   * {@link AuthService#authorize(Map, Callback)}.
    *
    * @return An instance of a {@link AuthService}.
    */
@@ -78,9 +104,8 @@ public class SoundCloudAuthenticator {
 
   /**
    * Launches an external browser so a user can give the app access. If configured properly,
-   * the user will return to the app and then {@link #handleResponse(Intent, String, String,
-   * String)}
-   * can be used with {@link AuthService#authorize(Authenticator, Callback)}
+   * the user will return to the app and then {@link #handleResponse(Intent, String, String, String)}
+   * can be used with {@link AuthService#authorize(Map, Callback)}
    * to obtain an Auth Token.
    *
    * @param context Used to start the browser intent.
@@ -105,7 +130,7 @@ public class SoundCloudAuthenticator {
   /**
    * The intent is filtered by the app's designated Authentication Activity.
    * The {@link Authenticator} provided by this method should be passed to
-   * {@link AuthService#authorize(Authenticator, Callback)}.
+   * {@link AuthService#authorize(Map, Callback)}.
    * The callback will give an authentication response that will contain an Auth Token.
    *
    * @param intent Intent that was filtered by the activity that should handle authentication.
@@ -113,25 +138,24 @@ public class SoundCloudAuthenticator {
    * @param clientId Secret Client ID.
    * @param clientSecret Client Secret.
    * @return An {@link Authenticator} which should be passed to
-   * {@link AuthService#authorize(Authenticator, Callback)}.
+   * {@link AuthService#authorize(Map, Callback)}.
    * @see <a href="http://soundcloud.com/you/apps">My Apps Page</a>
    */
-  public static Authenticator handleResponse(Intent intent, String redirectUri, String clientId,
+  public static HashMap<String, String> handleResponse(Intent intent, String redirectUri, String clientId,
       String clientSecret) {
     String uri = intent.getDataString();
     String code = Uri.parse(uri).getQueryParameter(RESPONSE_TYPE);
 
     if (code != null) {
+      HashMap<String, String> fieldMap = new HashMap<>();
 
-      Authenticator auth = new Authenticator();
+      fieldMap.put("client_id", clientId);
+      fieldMap.put("client_secret", clientSecret);
+      fieldMap.put("code", code);
+      fieldMap.put("grant_type", GrantType.AUTH_CODE);
+      fieldMap.put("redirect_uri", redirectUri);
 
-      auth.client_id = clientId;
-      auth.client_secret = clientSecret;
-      auth.code = code;
-      auth.grant_type = GrantType.AUTH_CODE;
-      auth.redirect_uri = redirectUri;
-
-      return auth;
+      return fieldMap;
     } else {
       throw new IllegalStateException("No code was returned by the request. \n" +
           "Returned URI: " + uri);
