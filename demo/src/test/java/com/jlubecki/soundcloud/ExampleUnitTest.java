@@ -21,5 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-include ':soundcloud-api', ':demo'
 
+package com.jlubecki.soundcloud;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+/**
+ * To work on unit tests, switch the Test Artifact in the Build Variants view.
+ */
+public class ExampleUnitTest {
+  @Test public void addition_isCorrect() throws Exception {
+    assertEquals(4, 2 + 2);
+  }
+}
