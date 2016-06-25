@@ -40,12 +40,26 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
 
   private final Activity context;
 
+  /**
+   * Creates a {@link SoundCloudAuthenticator} that will launch the authentication in a browser.
+   *
+   * @param clientId Client ID of the application requesting authorization.
+   * @param redirectUri Redirect URI of the application requesting authorization
+   * @param context Activity from which authentication is being launched.
+   */
   public BrowserSoundCloudAuthenticator(String clientId, String redirectUri, Activity context) {
     super(clientId, redirectUri);
 
     this.context = context;
   }
 
+  /**
+   * Browser implementation has no warmup. Typically this would be used to prepare the authentication
+   * flow in an asynchronous manner. The boolean return type can be used to specify whether or not
+   * the preparation could be completed.
+   *
+   * @return true
+   */
   @Override public boolean prepareAuthenticationFlow() {
     // Launches synchronously in this implementation, no preparation needed.
     return true;
@@ -68,6 +82,11 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
     context.startActivity(loginIntent);
   }
 
+  /**
+   * Resolves the package name for the browser that should open the authentication web page.
+   *
+   * @return the name of the application package that should open the URL.
+   */
   private String getBrowserPackageName() {
     String packageName = CustomTabsClient.getPackageName(context, null);
 

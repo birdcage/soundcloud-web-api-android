@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Jacob Lubecki
+ * Copyright (c) 2016 Jacob Lubecki
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.jlubecki.soundcloud.webapi.android.models;
+package com.jlubecki.soundcloud.webapi.android.auth.models;
 
 /**
  * Representation of the auth criteria needed to obtain a SoundCloud OAuth token.

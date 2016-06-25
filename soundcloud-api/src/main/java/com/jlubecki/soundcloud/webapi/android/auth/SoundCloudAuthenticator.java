@@ -27,8 +27,7 @@ package com.jlubecki.soundcloud.webapi.android.auth;
 import android.content.Intent;
 import android.net.Uri;
 import com.jlubecki.soundcloud.webapi.android.SoundCloudAPI;
-import com.jlubecki.soundcloud.webapi.android.models.AuthenticationResponse;
-import com.jlubecki.soundcloud.webapi.android.models.Authenticator;
+import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +58,12 @@ public abstract class SoundCloudAuthenticator {
   private final String clientId;
   private final String redirectUri;
 
+  /**
+   * Creates a new SoundCloudAuthenticator.
+   *
+   * @param clientId Client ID of the application requesting authorization.
+   * @param redirectUri Redirect URI of the application requesting authorization
+   */
   public SoundCloudAuthenticator(String clientId, String redirectUri) {
     this.clientId = clientId;
     this.redirectUri = redirectUri;
@@ -69,9 +74,13 @@ public abstract class SoundCloudAuthenticator {
    * @return true if the method was able to execute all necessary preparation steps.
    */
   public abstract boolean prepareAuthenticationFlow();
+
+  /**
+   * Method which should handle launching the authentication flow.
+   */
   public abstract void launchAuthenticationFlow();
 
-  protected String loginUrl() {
+  protected final String loginUrl() {
     return  "https://www.soundcloud.com/connect?" +
         "client_id=" + clientId +
         "&redirect_uri=" + redirectUri +
@@ -84,16 +93,16 @@ public abstract class SoundCloudAuthenticator {
 
   /**
    * The intent is filtered by the app's designated Authentication Activity.
-   * The {@link Authenticator} provided by this method should be passed to
-   * {@link AuthService#authorize(Map)}.
-   * The callback will give an authentication response that will contain an Auth Token.
+   * The callback will give an authentication code that can be used to obtain an Auth Token.
    *
    * @param intent Intent that was filtered by the activity that should handle authentication.
    * @param redirectUri The URI for the activity that should filter the intent.
    * @param clientId Secret Client ID.
    * @param clientSecret Client Secret.
-   * @return An {@link Authenticator} which should be passed to
-   * {@link AuthService#authorize(Map)}.
+   *
+   * @return a HashMap which should be passed to {@link AuthService#authorize(Map)}. Returns null if
+   *         no code was found in the intent data.
+   *
    * @see <a href="http://soundcloud.com/you/apps">My Apps Page</a>
    */
   public static HashMap<String, String> handleResponse(Intent intent, String redirectUri, String clientId,
@@ -112,8 +121,7 @@ public abstract class SoundCloudAuthenticator {
 
       return fieldMap;
     } else {
-      throw new IllegalStateException("No code was returned by the request. \n" +
-          "Returned URI: " + uri);
+      return null;
     }
   }
 

@@ -146,20 +146,6 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void playTrack(String trackUrl) {
-//        String dataString = trackUrl + "?client_id=" + CLIENT_ID;
-//
-//        Allocator allocator = new DefaultAllocator(BUFFER_SEGMENT_SIZE);
-//        DataSource dataSource = new DefaultUriDataSource(this, null, dataString);
-//        Mp3Extractor extractor = new Mp3Extractor();
-//
-//        ExtractorSampleSource sampleSource = new ExtractorSampleSource(
-//                Uri.parse(dataString), dataSource, allocator, BUFFER_SEGMENT_COUNT * BUFFER_SEGMENT_SIZE, extractor);
-//
-//        MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(sampleSource, null, true);
-//
-//        exoPlayer.prepare(audioRenderer);
-//        exoPlayer.setPlayWhenReady(true);
-
         player.reset();
         player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {

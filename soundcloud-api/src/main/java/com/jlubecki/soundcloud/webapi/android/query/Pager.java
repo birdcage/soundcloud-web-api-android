@@ -24,6 +24,7 @@
 
 package com.jlubecki.soundcloud.webapi.android.query;
 
+import android.support.annotation.IntRange;
 import java.util.HashMap;
 
 /**
@@ -31,11 +32,11 @@ import java.util.HashMap;
  */
 public class Pager {
 
-  public static String LIMIT = "limit";
-  public static String OFFSET = "offset";
+  public static final String LIMIT = "limit";
+  public static final String OFFSET = "offset";
 
-  public static int LIMIT_DEFAULT = 50;
-  public static int LIMIT_MAX = 200;
+  public static final int LIMIT_DEFAULT = 50;
+  public static final int LIMIT_MAX = 200;
 
   private HashMap<String, String> queryMap;
   private int limit = LIMIT_DEFAULT;
@@ -48,7 +49,7 @@ public class Pager {
     updateOffset(offset);
   }
 
-  public Pager(Query query, int pageSize) {
+  public Pager(Query query, @IntRange(from = 1, to = 200) int pageSize) {
     this.queryMap = query.createMap();
 
     this.limit = pageSize;
@@ -94,7 +95,7 @@ public class Pager {
     updateOffset(0);
   }
 
-  private void updateLimit(int limit) {
+  private void updateLimit(@IntRange(from = 1, to = 200) int limit) {
     this.limit = limit;
 
     queryMap.put(LIMIT, String.valueOf(limit));

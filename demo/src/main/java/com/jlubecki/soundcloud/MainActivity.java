@@ -36,18 +36,17 @@ import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.browser.BrowserSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.AuthTabServiceConnection;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator;
-import com.jlubecki.soundcloud.webapi.android.models.AuthenticationResponse;
+import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
 import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.jlubecki.soundclouddemo.Constants.*;
-import static com.jlubecki.soundclouddemo.Constants.AUTH_TOKEN_KEY;
-import static com.jlubecki.soundclouddemo.Constants.CLIENT_ID;
-import static com.jlubecki.soundclouddemo.Constants.CLIENT_SECRET;
-import static com.jlubecki.soundclouddemo.Constants.PREFS_NAME;
-import static com.jlubecki.soundclouddemo.Constants.REDIRECT;
+import static com.jlubecki.soundcloud.Constants.AUTH_TOKEN_KEY;
+import static com.jlubecki.soundcloud.Constants.CLIENT_ID;
+import static com.jlubecki.soundcloud.Constants.CLIENT_SECRET;
+import static com.jlubecki.soundcloud.Constants.PREFS_NAME;
+import static com.jlubecki.soundcloud.Constants.REDIRECT;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -28,6 +28,7 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.customtabs.CustomTabsCallback;
 import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
@@ -42,17 +43,17 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
   private static final String AUTH_BASE_URL = "https://www.soundcloud.com/connect";
 
   private final WeakReference<AuthenticationCallback> authCallbackReference;
-  private final WeakReference<AuthTabNavigationCallback> navCallbackReference;
+  private final WeakReference<CustomTabsCallback> navCallbackReference;
   private CustomTabsClient tabsClient;
   private CustomTabsSession tabsSession;
 
   public AuthTabServiceConnection(@NonNull AuthenticationCallback callback) {
     this.authCallbackReference = new WeakReference<>(callback);
-    this.navCallbackReference = new WeakReference<>(new AuthTabNavigationCallback());
+    this.navCallbackReference = new WeakReference<>(null);
   }
 
   public AuthTabServiceConnection(@NonNull AuthenticationCallback authenticationCallback,
-      @Nullable AuthTabNavigationCallback navigationCallback) {
+      @Nullable CustomTabsCallback navigationCallback) {
     this.authCallbackReference = new WeakReference<>(authenticationCallback);
     this.navCallbackReference = new WeakReference<>(navigationCallback);
   }

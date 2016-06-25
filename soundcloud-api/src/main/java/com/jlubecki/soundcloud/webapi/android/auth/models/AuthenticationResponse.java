@@ -22,20 +22,39 @@
  * SOFTWARE.
  */
 
-package com.jlubecki.soundcloud.webapi.android.auth.chrometabs;
-
-import android.os.Bundle;
-import android.support.customtabs.CustomTabsCallback;
-import android.util.Log;
+package com.jlubecki.soundcloud.webapi.android.auth.models;
 
 /**
- * Created by Jacob on 6/22/16.
+ * Representation of the API response from the authentication endpoint.
+ *
+ * @see <a href="https://developers.soundcloud.com/docs/api/reference#token">Auth Reference</a>
  */
-public final class AuthTabNavigationCallback extends CustomTabsCallback {
+public class AuthenticationResponse {
 
-  @Override public void onNavigationEvent(int navigationEvent, Bundle extras) {
-    String extrasInfo = extras != null ? extras.toString() : "No extras.";
+  public static final String TOKEN = "access_token";
+  public static final String ERROR = "error";
+  public static final String UNKNOWN = "unknown";
 
-    Log.i(this.getClass().getSimpleName(), navigationEvent + " " + extrasInfo);
+  public String access_token;
+
+  public String scope;
+
+  public String error;
+
+  /**
+   * Helper method to determine authentication response type.
+   *
+   * @return The type of the authentication response.
+   */
+  public String getType() {
+    if (access_token != null) {
+      return TOKEN;
+    }
+
+    if (error != null) {
+      return ERROR;
+    }
+
+    return UNKNOWN;
   }
 }
