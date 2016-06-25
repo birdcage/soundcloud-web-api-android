@@ -57,3 +57,6 @@ proguard/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Bintray
+bintray.properties

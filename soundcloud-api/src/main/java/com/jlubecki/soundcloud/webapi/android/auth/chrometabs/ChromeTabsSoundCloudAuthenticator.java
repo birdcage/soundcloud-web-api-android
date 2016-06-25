@@ -24,6 +24,8 @@
 
 package com.jlubecki.soundcloud.webapi.android.auth.chrometabs;
 
+import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -76,6 +78,7 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
     return CustomTabsClient.bindCustomTabsService(context, browserPackageName, serviceConnection);
   }
 
+  @SuppressLint("")
   @Override public void launchAuthenticationFlow() {
     CustomTabsSession tabsSession = serviceConnection.getSession();
     CustomTabsIntent tabsIntent = new CustomTabsIntent.Builder(tabsSession).build();
