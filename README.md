@@ -5,19 +5,6 @@ It uses [Retrofit](http://square.github.io/retrofit/) to create Java interfaces 
 
 ## Integration into your project
 
-In the main `build.gradle`:
-
-```groovy
-repositories {
-  jcenter()
-  
-  // Add this
-  maven {
-    url 'https://dl.bintray.com/jacoblubecki/maven/'
-  }
-}
-```
-
 Add following to the `build.gradle` file in your app:
 
 ```groovy
