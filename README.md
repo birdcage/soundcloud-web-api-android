@@ -3,34 +3,13 @@
 This project is a wrapper for the [SoundCloud Web API](https://developers.soundcloud.com/docs/api/reference).
 It uses [Retrofit](http://square.github.io/retrofit/) to create Java interfaces from API endpoints.
 
-## Building
-This project is built using [Gradle](https://gradle.org/):
-
-1. Clone the repository: `git clone https://github.com/birdcage/soundcloud-web-api-android.git`
-2. Open and build the project.
-3. Grab the `aar` that can be found in `soundcloud-web-api-android/build/outputs/aar/soundcloud-web-api-android-1.0.0.aar`
-  and put it in the `libs` folder in your application
-
 ## Integration into your project
-
-This project depends on `Retrofit 1.9.0` and `OkHttp 2.4.0`. When you build it, it creates an `aar`
-that doesn't contain Retrofit and OkHttp files. To make your app work you'll need to include these
-dependencies in your app's `build.gradle` file.
 
 Add following to the `build.gradle` file in your app:
 
 ```groovy
-repositories {
-    mavenCentral()
-    flatDir {
-        dirs 'libs'
-    }
-}
-
 dependencies {
-    compile(name:'soundcloud-web-api-android-1.0.0', ext:'aar')
-    compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile 'com.squareup.okhttp:okhttp:2.4.0'
+    compile 'com.jlubecki.soundcloud:soundcloud-api:1.1.1'
 
     // Other dependencies
 }
@@ -39,10 +18,9 @@ dependencies {
 Alternatively, the project can be imported into an existing project as a module.
 
 
-
 ## Usage
 
-This project uses the default [OkHttp](http://square.github.io/okhttp/) client.
+### Making Requests
 
 ```java
 SoundCloudAPI api = new SoundCloudAPI("clientId");
@@ -53,18 +31,25 @@ api.setToken("token");
 
 SoundCloudService soundcloud = api.getService();
 
-soundcloud.getTrack("trackId", new Callback<Track>() {
+soundcloud.getTrack("trackId").enqueue(new Callback<Track>() {
     @Override
-    public void success(Track track, Response response) {
-        Log.d("Track success", track.title);
+    public void onResponse(Call<Track> call, Response<Track> response) {
+        Track track = response.body();
+        
+        if(track != null) {
+            Log.i(TAG, "Track success: " + track.title);
+        } else {
+            Log.w(TAG, "Error in response.");
+        }
     }
 
     @Override
-    public void failure(RetrofitError error) {
-        Log.d("Track failure", error.toString());
+    public void onFailure(Call<Track> call, Throwable t) {
+        Log.e(TAG, "Error getting track.", t);
     }
 });
 ```
+
 
 It is also possible to construct the adapter with custom parameters.
 
@@ -72,36 +57,109 @@ It is also possible to construct the adapter with custom parameters.
 final String clientId = "id";
 final String accessToken = "token";
 
-RestAdapter adapter = new RestAdapter.Builder()
-        .setEndpoint(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT)
-        .setRequestInterceptor(new RequestInterceptor() {
-            @Override
-            public void intercept(RequestFacade request) {
-                request.addQueryParam("client_id", clientId);
-                request.addQueryParam("oauth_token", accessToken);
-            }
-        })
-        .build();
+OkHttpClient client = new OkHttpClient.Builder()
+    .addInterceptor(new Interceptor() {
+        @Override 
+        public Response intercept(Chain chain) throws IOException {
+             Request request = chain.request();
+        
+             HttpUrl url = request.url()
+                 .newBuilder()
+                 .addEncodedQueryParameter("client_id", clientId)
+                 .addEncodedQueryParameter("token", accessToken)
+                 .build();
+        
+             Request newRequest = request.newBuilder()
+                 .url(url)
+                 .build();
+        
+             return chain.proceed(newRequest);
+        }
+    })
+    .build();
+
+Retrofit adapter = new Retrofit.Builder()
+    .client(client)
+    .baseUrl(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT)
+    .addConverterFactory(GsonConverterFactory.create())
+    .build();
+
+service = adapter.create(SoundCloudService.class);
 
 SoundCloudService soundcloud = adapter.create(SoundCloudService.class);
 ```
 
-## Obtaining Access Tokens
+### Authentication
 
-The provided SoundCloudAuthenticator class makes obtaining an auth token easy.
+The provided implementations of the SoundCloudAuthenticator class make 
+obtaining an auth token easy.
 
-To open login:
+To setup login:
 
 ```java
-SoundCloudAuthenticator.openLoginActivity(context, "clientId", "clientSecret");
-```
-Login will open in the default phone browser. Once the user has given the application permission to
-authenticate on their behalf, SoundCloud will redirect to the URI specified by the app. This intent
-should be filtered by the activity that should obtain the Auth Token. Additionally, that activity
-should be a single top activity meaning only one instance of it exists at a given time. To do this,
-add `android:launchMode="singleTop"` to the activity in the manifest.
 
-In the android manifest, a redirect of `yourapp://soundcloud/redirect` would look like:
+private AuthenticationCallback authCallback = new AuthenticationCallback() {
+        @Override
+        public void onReadyToAuthenticate() {
+            // Tabs Authenticator is ready when this is called
+        }
+    
+        @Override
+        public void onAuthenticationEnded() {
+            Log.i(TAG, "Auth ended.");
+        }
+    };
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    
+    ...
+
+    // Prepare browser auth, ready to launch instantly
+    browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+
+    // or...
+    
+    // Prepare Chrome Tabs auth, ready to launch based on authCallback
+    AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(authCallback);
+    tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
+}
+
+@Override 
+protected void onStart() {
+    super.onStart();
+
+    // The documentation for Chrome Custom Tabs recommends preparing the
+    // Custom Tab in onStart.
+    
+    if(tabsAuthenticator != null) {
+        boolean ok = tabsAuthenticator.prepareAuthenticationFlow();
+
+        Log.i(TAG, "Tab auth did connect: " + ok);
+    }
+}
+```
+
+When ready to launch the authentication flow:
+
+```java
+browserAuthenticator.launchAuthenticationFlow();
+
+// or...
+
+tabsAuthenticator.launchAuthenticationFlow();
+```
+
+Once the user has given the application permission to authenticate on 
+their behalf, SoundCloud will redirect to the URI specified by the app. 
+This intent should be filtered by the activity that should obtain the 
+Auth Token. Additionally, that activity should be a single top activity 
+meaning only one instance of it exists at a given time. To do this, add 
+`android:launchMode="singleTop"` to the activity in the manifest.
+
+In the android manifest, a redirect of `yourapp://soundcloud/redirect` 
+would look like:
 
 ```xml
 <activity android:name=".YourActivity"
@@ -110,6 +168,7 @@ In the android manifest, a redirect of `yourapp://soundcloud/redirect` would loo
         <action android:name="android.intent.action.VIEW" />
         <category android:name="android.intent.category.DEFAULT" />
         <category android:name="android.intent.category.BROWSABLE" />
+        
         <data android:scheme="yourapp" 
             android:host="soundcloud" 
             android:pathPrefix="/redirect"/>
@@ -117,46 +176,58 @@ In the android manifest, a redirect of `yourapp://soundcloud/redirect` would loo
 </activity>
 ```
 
+#### Handling the Intent Filter
+
+A sample implementation of code to handle an intent.
+
+```java
+void authenticateWithIntent(Intent intent) {
+    super.onNewIntent(intent);
+    
+    if(intent.getDataString().startsWith("redirect")) {
+        HashMap<String, String> authMap = 
+            SoundCloudAuthenticator.handleResponse(intent, "redirect", "clientId", "secret"); 
+            
+        SoundCloudAuthenticator.AuthService service = someAuthenticator.getAuthService();
+        service.authorize(authMap).enqueue(new Callback<AuthenticationResponse>() {
+            @Override
+            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
+                // See if the response succeeded and has a token
+            }
+
+            @Override 
+            public void onFailure(Call<AuthenticationResponse> call, Throwable t) 
+                // See what went wrong
+            }
+        });
+    }
+}
+```
+
+#### Browser Based Notes
+
 Once the user has completed the external auth and the intent filter reopens the app, the activity
 should override `protected void onNewIntent(Intent intent)` and check that the data in the intent
 matches the specified redirect URI. If it does, the app should use the SoundCloudAuthenticator to
 handle the response and then obtain the auth token.
 
-```java
-@Override
-protected void onNewIntent(Intent intent) {
-    super.onNewIntent(intent);
-    
-    if(intent.getDataString().startsWith("redirect")) {
-        Authenticator auth = 
-            SoundCloudAuthenticator.handleResponse(intent, "redirect", "clientId", "secret"); 
-            
-        SoundCloudAuthenticator.AuthService service = SoundCloudAuthenticator.getAuthService();
-        service.authorize(auth, new Callback<AuthenticationResponse>() {
-            @Override
-            public void success(AuthenticationResponse authResponse, Response response) {
-                Log.v("AUTH SUCCESS", "TOKEN: " + authResponse.access_token);
-                // Save the token
-            }
+#### Chrome Custom Tabs Notes
 
-            @Override 
-            public void failure(RetrofitError error) {
-                Log.e("AUTH FAILED", "ERROR: " + error.getMessage());
-                // See what went wrong
-            }
-        });
-    } else {
-        // handle other new intents    
-    }
-}
-```
+Using Chrome Custom Tabs will prevent `onNewIntent` from being called. The activity should still
+receive a new Intent, but it can be handled in `onResume` instead. Handling the intent in this
+case can be a bit more complicated, but some implementations may see advantages in using Chrome
+Custom Tabs to authenticate.
+
+For instance:
+- Customize look and feel of tabs using `tabsAuthenticator.newTabsIntentBuilder()` 
+and `tabsAuthenticator.setTabsIntentBuilder(builder)`.
+- Improve loading times of the authentication flow (built in to the `AuthTabServiceConnection`).
+- Add callbacks to observe simple navigation events to understand the authentication flow.
+
+
+### Other Info
 
 For information on client ID, secret, and the redirect URI, see the [SoundCloud Apps Page](http://soundcloud.com/you/apps). 
-
-## Error Handling
-
-When using Retrofit, errors are returned as [`RetrofitError`](http://square.github.io/retrofit/javadoc/retrofit/RetrofitError.html)
-objects. These objects contain HTTP status codes and their descriptions, for example `400 - Bad Request`.
 
 ## License
 
