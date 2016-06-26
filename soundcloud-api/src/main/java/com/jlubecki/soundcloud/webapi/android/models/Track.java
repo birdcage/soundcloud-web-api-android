@@ -345,7 +345,7 @@ public class Track {
   }
 
   /**
-   * Only for use with {@link SoundCloudService#searchTracks(HashMap, Callback)}.
+   * Only for use with {@link SoundCloudService#searchTracks(HashMap)}.
    * Filters tracks by visibility on site.
    */
   public enum Filter {

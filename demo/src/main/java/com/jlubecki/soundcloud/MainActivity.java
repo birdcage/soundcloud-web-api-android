@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
     private BrowserSoundCloudAuthenticator browserAuthenticator;
     private ChromeTabsSoundCloudAuthenticator tabsAuthenticator;
 
-    private Button browserAuthButton;
     private Button chromeTabAuthButton;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "OnCreate");
 
         // Prepare views
-        browserAuthButton = (Button) findViewById(R.id.btn_browser_auth);
+        Button browserAuthButton = (Button) findViewById(R.id.btn_browser_auth);
         chromeTabAuthButton = (Button) findViewById(R.id.btn_chrome_auth);
         chromeTabAuthButton.setEnabled(false);
 
