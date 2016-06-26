@@ -24,9 +24,13 @@
 
 package com.jlubecki.soundcloud;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BrowserSoundCloudAuthenticator browserAuthenticator;
     private ChromeTabsSoundCloudAuthenticator tabsAuthenticator;
+    private boolean tabsDidConnect = false;
 
     private Button chromeTabAuthButton;
 
@@ -94,6 +99,13 @@ public class MainActivity extends AppCompatActivity {
 
         tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
 
+        // Customize Chrome Tabs
+        CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
+            .setToolbarColor(getColorCompat(R.color.colorPrimary))
+            .setSecondaryToolbarColor(getColorCompat(R.color.colorAccent));
+
+        tabsAuthenticator.setTabsIntentBuilder(builder);
+
         chromeTabAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,9 +118,9 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         if(tabsAuthenticator != null) {
-            boolean ok = tabsAuthenticator.prepareAuthenticationFlow();
+            tabsDidConnect = tabsAuthenticator.prepareAuthenticationFlow();
 
-            Log.i(TAG, "Tab auth did connect: " + ok);
+            Log.i(TAG, "Tab auth did connect: " + tabsDidConnect);
         }
     }
 
@@ -166,10 +178,19 @@ public class MainActivity extends AppCompatActivity {
     @Override public void onDestroy() {
         Log.i(TAG, "OnDestroy");
 
-        if(tabsAuthenticator != null) {
+        if(tabsAuthenticator != null && tabsDidConnect) {
             tabsAuthenticator.unbindService();
         }
 
         super.onDestroy();
+    }
+
+    @SuppressLint("deprecation")
+    private int getColorCompat(@ColorRes int color) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return getColor(color);
+        } else {
+            return getResources().getColor(color);
+        }
     }
 }

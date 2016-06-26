@@ -40,12 +40,11 @@ import java.lang.ref.WeakReference;
  */
 public class AuthTabServiceConnection extends CustomTabsServiceConnection {
 
-  private static final String AUTH_BASE_URL = "https://www.soundcloud.com/connect";
-
   private final WeakReference<AuthenticationCallback> authCallbackReference;
   private final WeakReference<CustomTabsCallback> navCallbackReference;
   private CustomTabsClient tabsClient;
   private CustomTabsSession tabsSession;
+  private String clientAuthUrl;
 
   public AuthTabServiceConnection(@NonNull AuthenticationCallback callback) {
     this.authCallbackReference = new WeakReference<>(callback);
@@ -66,8 +65,8 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
 
     tabsSession = tabsClient.newSession(navCallbackReference.get());
 
-    if (tabsSession != null) {
-      tabsSession.mayLaunchUrl(Uri.parse(AUTH_BASE_URL), null, null);
+    if (tabsSession != null && clientAuthUrl != null) {
+      tabsSession.mayLaunchUrl(Uri.parse(clientAuthUrl), null, null);
     }
 
     AuthenticationCallback callback = authCallbackReference.get();
@@ -84,6 +83,10 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
     if(callback != null) {
       callback.onAuthenticationEnded();
     }
+  }
+
+  public void setClientAuthUrl(String authUrl) {
+    this.clientAuthUrl = authUrl;
   }
 
   public CustomTabsSession getSession() {

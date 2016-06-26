@@ -29,12 +29,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.support.customtabs.CustomTabsClient;
 import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by Jacob on 6/23/16.
+ *
+ * Used to authenticate SoundCloud via an installed Browser on the user's device.
  */
 public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
 
@@ -74,11 +76,10 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
    * @see <a href="http://soundcloud.com/you/apps">My Apps Page</a>
    */
   @Override public void launchAuthenticationFlow() {
-    Uri authUri = Uri.parse(loginUrl());
-
-    Intent loginIntent = new Intent(Intent.ACTION_VIEW);
+    Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl()));
     loginIntent.setPackage(getBrowserPackageName());
-    loginIntent.setData(authUri);
+    addReferrerToIntent(loginIntent, context.getPackageName());
+
     context.startActivity(loginIntent);
   }
 
@@ -88,18 +89,24 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
    * @return the name of the application package that should open the URL.
    */
   private String getBrowserPackageName() {
-    String packageName = CustomTabsClient.getPackageName(context, null);
+    String packageName = "com.android.browser"; // Probably exists
 
-    if(packageName == null) {
-      Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.example.com"));
+    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
 
-      PackageManager manager = context.getPackageManager();
-      ResolveInfo info = manager.resolveActivity(webIntent, 0);
+    List<ResolveInfo> resolveInfos = context.getPackageManager()
+        .queryIntentActivities(webIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
-      if(info != null) {
+    // List should only contain one value if a default browser is selected
+    if(resolveInfos != null && resolveInfos.size() > 0) {
+      for (ResolveInfo info : resolveInfos) {
+
+        // Go to the next list item if this ResolveInfo doesn't have an associated packageName
+        if(info.activityInfo == null) continue;
+        if(info.activityInfo.packageName == null) continue;
+
         packageName = info.activityInfo.packageName;
-      } else {
-        packageName = "com.android.browser";
+
+        break; // A package to handle the intent was found
       }
     }
 

@@ -26,6 +26,7 @@ package com.jlubecki.soundcloud.webapi.android.auth;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import com.jlubecki.soundcloud.webapi.android.SoundCloudAPI;
 import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
 import java.io.IOException;
@@ -88,6 +89,13 @@ public abstract class SoundCloudAuthenticator {
         "&scope=" + SCOPE +
         "&display=" + DISPLAY +
         "&state=" + STATE;
+  }
+
+  protected final void addReferrerToIntent(Intent intent, String packageName) {
+    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+      String referrer = Intent.URI_ANDROID_APP_SCHEME + "//" + packageName;
+      intent.putExtra(Intent.EXTRA_REFERRER_NAME, referrer);
+    }
   }
 
 
@@ -181,7 +189,7 @@ public abstract class SoundCloudAuthenticator {
     return service;
   }
 
-  private class AuthInterceptor implements Interceptor {
+  protected class AuthInterceptor implements Interceptor {
     @Override public Response intercept(Chain chain) throws IOException {
 
       Request request = chain.request();
