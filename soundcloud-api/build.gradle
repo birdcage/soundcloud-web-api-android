@@ -103,6 +103,7 @@ artifacts {
 
 def siteUrl = 'https://github.com/birdcage/soundcloud-web-api-android'
 def gitUrl = 'https://github.com/birdcage/soundcloud-web-api-android.git'
+def issueUrl = 'https://github.com/birdcage/soundcloud-web-api-android/issues'
 
 install {
   repositories.mavenInstaller {
@@ -153,9 +154,16 @@ bintray {
     repo = 'maven'
     name = 'soundcloud-web-api-android'
     desc = 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
+
     websiteUrl = siteUrl
     vcsUrl = gitUrl
+    issueTrackerUrl = issueUrl
+
     licenses = ["MIT"]
+
+    publicDownloadNumbers = true
+
+    labels = ['birdcage', 'soundcloud', 'API', 'Android', 'Java']
   }
 
   pkg.version {
