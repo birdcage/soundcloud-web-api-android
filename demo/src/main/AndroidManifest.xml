@@ -58,7 +58,8 @@
     </activity>
 
     <activity android:name="com.jlubecki.soundcloud.PlayerActivity"
-        android:label="SoundCloud Demo Player"/>
+        android:label="SoundCloud Demo Player"
+        android:configChanges="orientation|screenSize"/>
   </application>
 
 </manifest>

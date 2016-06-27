@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import com.jlubecki.soundcloud.webapi.android.SoundCloudAPI;
 import com.jlubecki.soundcloud.webapi.android.SoundCloudService;
@@ -70,6 +71,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     private final MediaPlayer player = new MediaPlayer();
 
+    private ImageButton playPauseButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,11 +85,11 @@ public class PlayerActivity extends AppCompatActivity {
             SoundCloudAPI api = new SoundCloudAPI(CLIENT_ID);
             api.setToken(token);
 
-            Log.i(TAG, token);
-
             soundcloud = api.getService();
         } else {
             finish();
+
+            return;
         }
 
         EditText searchBox = (EditText) findViewById(R.id.search_box);
@@ -121,6 +124,12 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        playPauseButton = (ImageButton) findViewById(R.id.play_pause);
+        playPauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                togglePlayPause();
+            }
+        });
     }
 
     private void createSongList() {
@@ -153,6 +162,7 @@ public class PlayerActivity extends AppCompatActivity {
             public void onPrepared(MediaPlayer mp) {
                 if (!player.isPlaying()) {
                     player.start();
+                    playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
                 }
             }
         });
@@ -176,13 +186,18 @@ public class PlayerActivity extends AppCompatActivity {
         player.prepareAsync();
     }
 
-    public void togglePlayPause(View view) {
+    private void togglePlayPause() {
         if (player.isPlaying()) {
             player.pause();
+            playPauseButton.setImageResource(android.R.drawable.ic_media_play);
         } else if (trackUrls.size() > 0 && !player.isPlaying() && currentTrack == -1) {
             playTrack(trackUrls.get(0));
         } else {
             player.start();
+
+            if(player.isPlaying()) {
+                playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
+            }
         }
     }
 

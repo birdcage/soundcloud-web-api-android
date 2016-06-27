@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
-        Log.i(TAG, "OnCreate");
 
         // Prepare views
         Button browserAuthButton = (Button) findViewById(R.id.btn_browser_auth);
@@ -86,6 +85,14 @@ public class MainActivity extends AppCompatActivity {
         AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
             @Override
             public void onReadyToAuthenticate() {
+
+                // Customize Chrome Tabs
+                CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
+                    .setToolbarColor(getColorCompat(R.color.colorPrimary))
+                    .setSecondaryToolbarColor(getColorCompat(R.color.colorAccent));
+
+                tabsAuthenticator.setTabsIntentBuilder(builder);
+
                 if(chromeTabAuthButton != null) {
                     chromeTabAuthButton.setEnabled(true);
                 }
@@ -98,13 +105,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
-
-        // Customize Chrome Tabs
-        CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
-            .setToolbarColor(getColorCompat(R.color.colorPrimary))
-            .setSecondaryToolbarColor(getColorCompat(R.color.colorAccent));
-
-        tabsAuthenticator.setTabsIntentBuilder(builder);
 
         chromeTabAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
