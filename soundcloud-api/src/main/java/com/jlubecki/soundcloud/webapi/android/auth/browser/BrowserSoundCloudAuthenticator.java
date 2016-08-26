@@ -41,6 +41,8 @@ import java.util.Map;
 public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
 
   private final Activity context;
+  private final String browserPackageName;
+  private final Intent launchIntent;
 
   /**
    * Creates a {@link SoundCloudAuthenticator} that will launch the authentication in a browser.
@@ -53,6 +55,8 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
     super(clientId, redirectUri);
 
     this.context = context;
+    this.browserPackageName = getBrowserPackageName();
+    this.launchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl()));
   }
 
   /**
@@ -63,8 +67,8 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
    * @return true
    */
   @Override public boolean prepareAuthenticationFlow() {
-    // Launches synchronously in this implementation, no preparation needed.
-    return true;
+    // Make sure the intent can be launched by an application.
+    return context.getPackageManager().queryIntentActivities(launchIntent, 0).size() > 0;
   }
 
   /**
@@ -76,20 +80,21 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
    * @see <a href="http://soundcloud.com/you/apps">My Apps Page</a>
    */
   @Override public void launchAuthenticationFlow() {
-    Intent loginIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(loginUrl()));
-    loginIntent.setPackage(getBrowserPackageName());
-    addReferrerToIntent(loginIntent, context.getPackageName());
+    if(browserPackageName != null) {
+      launchIntent.setPackage(browserPackageName);
+    }
+    addReferrerToIntent(launchIntent, context.getPackageName());
 
-    context.startActivity(loginIntent);
+    context.startActivity(launchIntent);
   }
 
   /**
    * Resolves the package name for the browser that should open the authentication web page.
    *
-   * @return the name of the application package that should open the URL.
+   * @return the name of the application package that should open the URL or null if none is found.
    */
   private String getBrowserPackageName() {
-    String packageName = "com.android.browser"; // Probably exists
+    String packageName = null;
 
     Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
 
