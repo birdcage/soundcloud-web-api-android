@@ -53,7 +53,8 @@ android {
 
 dependencies {
   // android
-  compile 'com.android.support:customtabs:24.0.0'
+  compile 'com.android.support:appcompat-v7:24.2.0'
+  compile 'com.android.support:customtabs:24.2.0'
 
   // retrofit
   compile 'com.squareup.retrofit2:retrofit:2.1.0'

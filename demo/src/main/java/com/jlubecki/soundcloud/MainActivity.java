@@ -31,16 +31,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
 import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.browser.BrowserSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.AuthTabServiceConnection;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
+import com.jlubecki.soundcloud.webapi.android.auth.webview.WebViewSoundCloudAuthenticator;
+
 import java.util.HashMap;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,11 +62,17 @@ public class MainActivity extends AppCompatActivity {
     // Logging
     private static final String TAG = "MainActivity";
 
+    // Constants
+    private static final int REQUEST_CODE = 1337;
+
+    // Variables
     private BrowserSoundCloudAuthenticator browserAuthenticator;
     private ChromeTabsSoundCloudAuthenticator tabsAuthenticator;
-    private boolean tabsDidConnect = false;
+    private WebViewSoundCloudAuthenticator webViewAuthenticator;
 
+    // Views
     private Button chromeTabAuthButton;
+    private Button webViewAuthButton;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,17 +81,9 @@ public class MainActivity extends AppCompatActivity {
         // Prepare views
         Button browserAuthButton = (Button) findViewById(R.id.btn_browser_auth);
         chromeTabAuthButton = (Button) findViewById(R.id.btn_chrome_auth);
-        chromeTabAuthButton.setEnabled(false);
+        webViewAuthButton = (Button) findViewById(R.id.btn_wv_auth);
 
         // Prepare auth methods
-        browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
-
-        browserAuthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                browserAuthenticator.launchAuthenticationFlow();
-            }
-        });
 
         AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
             @Override
@@ -88,8 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // Customize Chrome Tabs
                 CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
-                    .setToolbarColor(getColorCompat(R.color.colorPrimary))
-                    .setSecondaryToolbarColor(getColorCompat(R.color.colorAccent));
+                        .setToolbarColor(ContextCompat.getColor(MainActivity.this, R.color.colorPrimary))
+                        .setSecondaryToolbarColor(ContextCompat.getColor(MainActivity.this, R.color.colorAccent));
 
                 tabsAuthenticator.setTabsIntentBuilder(builder);
 
@@ -104,7 +107,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
         tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
+        webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE);
+
+        boolean browserPrepared = browserAuthenticator.prepareAuthenticationFlow();
+        boolean tabsPrepared = tabsAuthenticator.prepareAuthenticationFlow();
+        boolean webViewPrepared = webViewAuthenticator.prepareAuthenticationFlow();
+
+        browserAuthButton.setEnabled(browserPrepared);
+        chromeTabAuthButton.setEnabled(tabsPrepared);
+        webViewAuthButton.setEnabled(webViewPrepared);
+
+        Log.d(TAG, "Browser auth enabled: " + browserPrepared);
+        Log.d(TAG, "Tabs auth enabled: " + tabsPrepared);
+        Log.d(TAG, "WebView auth enabled: " + webViewPrepared);
+
+
+        browserAuthButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                browserAuthenticator.launchAuthenticationFlow();
+            }
+        });
 
         chromeTabAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,28 +137,55 @@ public class MainActivity extends AppCompatActivity {
                 tabsAuthenticator.launchAuthenticationFlow();
             }
         });
+
+        webViewAuthButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                webViewAuthenticator.launchAuthenticationFlow();
+            }
+        });
     }
 
-    @Override protected void onStart() {
-        super.onStart();
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
-        if(tabsAuthenticator != null) {
-            tabsDidConnect = tabsAuthenticator.prepareAuthenticationFlow();
+        getTokenFromIntent(intent);
+    }
 
-            Log.i(TAG, "Tab auth did connect: " + tabsDidConnect);
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK) {
+            if(requestCode == REQUEST_CODE) {
+                getTokenFromIntent(data);
+            }
+        } else if(resultCode == RESULT_CANCELED) {
+            Toast.makeText(this, "Authentication canceled.", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override protected void onResume() {
-        super.onResume();
+    @Override public void onDestroy() {
+        Log.i(TAG, "OnDestroy");
 
-        Intent intent = getIntent();
+        if(tabsAuthenticator != null) {
+            tabsAuthenticator.unbindService();
+        }
 
-        String intentInfo = intent != null ? intent.getDataString() : "Null intent.";
+        super.onDestroy();
+    }
 
-        Log.i(TAG, "Lifecycle method onResume with intent info: " + intentInfo);
+
+    // region Helper
+
+    void getTokenFromIntent(Intent intent) {
+
+        String intentInfo = intent != null ? intent.getDataString() : "Null";
+        Log.i(TAG, "Trying to get token from intent data: " + intentInfo);
 
         if(intent != null && intent.getDataString() != null && intent.getDataString().contains(REDIRECT)) {
+
             HashMap<String, String> authMap = SoundCloudAuthenticator.handleResponse(intent, REDIRECT, CLIENT_ID, CLIENT_SECRET);
 
             SoundCloudAuthenticator.AuthService service = tabsAuthenticator.getAuthService(); // Method is final, varies only with clientId used to construct the authenticator
@@ -163,34 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.w(TAG, "Other new intent not handled.");
-        }
-
-
-    }
-
-    @Override protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        setIntent(intent);
-    }
-
-    @Override public void onDestroy() {
-        Log.i(TAG, "OnDestroy");
-
-        if(tabsAuthenticator != null && tabsDidConnect) {
-            tabsAuthenticator.unbindService();
-        }
-
-        super.onDestroy();
-    }
-
-    @SuppressLint("deprecation")
-    private int getColorCompat(@ColorRes int color) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return getColor(color);
-        } else {
-            return getResources().getColor(color);
+            Log.w(this.getClass().getSimpleName(), "Intent data could not be handled.");
         }
     }
 }

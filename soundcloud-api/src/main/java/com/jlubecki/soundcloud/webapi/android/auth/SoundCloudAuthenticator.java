@@ -56,8 +56,8 @@ public abstract class SoundCloudAuthenticator {
   private static final String DISPLAY = "popup";
   private static final String STATE = "asdf";
 
-  private final String clientId;
-  private final String redirectUri;
+  protected final String clientId;
+  protected final String redirectUri;
 
   /**
    * Creates a new SoundCloudAuthenticator.
