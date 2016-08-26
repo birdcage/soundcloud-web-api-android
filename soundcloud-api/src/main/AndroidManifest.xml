@@ -26,6 +26,7 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <activity android:name="com.jlubecki.soundcloud.webapi.android.auth.webview.AuthenticationActivity"/>
+        <activity android:name="com.jlubecki.soundcloud.webapi.android.auth.webview.AuthenticationActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 </manifest>

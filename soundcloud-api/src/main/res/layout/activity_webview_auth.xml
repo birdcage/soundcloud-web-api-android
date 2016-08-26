@@ -24,14 +24,16 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/transparent">
+                android:background="@android:color/transparent"
+                tools:context=".auth.webview.AuthenticationActivity">
 
     <WebView
         android:id="@+id/wv_auth"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:layout_margin="16dp"/>
+        android:layout_margin="32dp"/>
 </RelativeLayout>
