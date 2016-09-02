@@ -29,23 +29,23 @@ package com.jlubecki.soundcloud.webapi.android.models;
  * connected to a SoundCloud account.
  *
  * @see <a href="https://developers.soundcloud.com/docs/api/reference#connections">
- *   SoundCloud Connection Reference</a>
+ * SoundCloud Connection Reference</a>
  */
 public class Connection {
 
-  public String created_at;
+    public String created_at;
 
-  public String display_name;
+    public String display_name;
 
-  public String id;
+    public String id;
 
-  public String post_favorite;
+    public String post_favorite;
 
-  public String post_publish;
+    public String post_publish;
 
-  public String service;
+    public String service;
 
-  public String type;
+    public String type;
 
-  public String uri;
+    public String uri;
 }

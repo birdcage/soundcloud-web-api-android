@@ -30,5 +30,5 @@ import java.util.List;
  * List of {@link Connection} objects.
  */
 public class Connections {
-  public List<Connections> connections;
+    public List<Connections> connections;
 }

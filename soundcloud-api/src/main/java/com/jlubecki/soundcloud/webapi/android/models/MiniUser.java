@@ -30,22 +30,22 @@ package com.jlubecki.soundcloud.webapi.android.models;
  */
 public class MiniUser {
 
-  public String avatar_url;
+    public String avatar_url;
 
-  /**
-   * Integer value of a user's ID.
-   */
-  public String id;
+    /**
+     * Integer value of a user's ID.
+     */
+    public String id;
 
-  public String kind;
+    public String kind;
 
-  public String last_modified;
+    public String last_modified;
 
-  public String permalink;
+    public String permalink;
 
-  public String permalink_url;
+    public String permalink_url;
 
-  public String uri;
+    public String uri;
 
-  public String username;
+    public String username;
 }

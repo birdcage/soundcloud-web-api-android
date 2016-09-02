@@ -25,17 +25,13 @@
 package com.jlubecki.soundcloud.webapi.android.auth.webview;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import com.jlubecki.soundcloud.webapi.android.R;
 
@@ -62,7 +58,7 @@ public class AuthenticationActivity extends AppCompatActivity {
         String loginUrl = getIntent().getStringExtra(EXTRA_AUTH_URL);
         redirectUri = getIntent().getStringExtra(EXTRA_AUTH_REDIRECT);
 
-        if(loginUrl != null && redirectUri != null) {
+        if (loginUrl != null && redirectUri != null) {
             webView.loadUrl(loginUrl);
         } else {
             setResult(RESULT_CANCELED);
@@ -86,7 +82,7 @@ public class AuthenticationActivity extends AppCompatActivity {
                 Uri data = Uri.parse(url);
                 resultIntent.setData(data);
 
-                if(url.contains("?code=")) {
+                if (url.contains("?code=")) {
                     setResult(RESULT_OK, resultIntent);
                 } else {
                     setResult(RESULT_CANCELED, resultIntent);

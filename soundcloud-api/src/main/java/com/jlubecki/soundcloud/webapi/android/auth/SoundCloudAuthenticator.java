@@ -72,6 +72,7 @@ public abstract class SoundCloudAuthenticator {
 
   /**
    * Method to create asynchronous authentication preparation flows.
+   *
    * @return true if the method was able to execute all necessary preparation steps.
    */
   public abstract boolean prepareAuthenticationFlow();
@@ -82,7 +83,7 @@ public abstract class SoundCloudAuthenticator {
   public abstract void launchAuthenticationFlow();
 
   protected final String loginUrl() {
-    return  "https://www.soundcloud.com/connect?" +
+    return "https://www.soundcloud.com/connect?" +
         "client_id=" + clientId +
         "&redirect_uri=" + redirectUri +
         "&response_type=" + RESPONSE_TYPE +
@@ -98,41 +99,43 @@ public abstract class SoundCloudAuthenticator {
     }
   }
 
+  public boolean canAuthenticate(Intent intent) {
+    return intent != null &&
+        intent.getDataString() != null &&
+        intent.getDataString().contains(redirectUri);
+  }
 
   /**
    * The intent is filtered by the app's designated Authentication Activity.
    * The callback will give an authentication code that can be used to obtain an Auth Token.
    *
    * @param intent Intent that was filtered by the activity that should handle authentication.
-   * @param redirectUri The URI for the activity that should filter the intent.
-   * @param clientId Secret Client ID.
    * @param clientSecret Client Secret.
-   *
    * @return a HashMap which should be passed to {@link AuthService#authorize(Map)}. Returns null if
-   *         no code was found in the intent data.
-   *
+   * no code was found in the intent data.
    * @see <a href="http://soundcloud.com/you/apps">My Apps Page</a>
    */
-  public static HashMap<String, String> handleResponse(Intent intent, String redirectUri, String clientId,
-      String clientSecret) {
-    String uri = intent.getDataString();
-    String code = Uri.parse(uri).getQueryParameter(RESPONSE_TYPE);
+  public HashMap<String, String> handleResponse(Intent intent, String clientSecret) {
+    if (canAuthenticate(intent)) {
+      String uri = intent.getDataString();
 
-    if (code != null) {
-      HashMap<String, String> fieldMap = new HashMap<>();
+      String code = Uri.parse(uri).getQueryParameter(RESPONSE_TYPE);
 
-      fieldMap.put("client_id", clientId);
-      fieldMap.put("client_secret", clientSecret);
-      fieldMap.put("code", code);
-      fieldMap.put("grant_type", GrantType.AUTH_CODE);
-      fieldMap.put("redirect_uri", redirectUri);
+      if (code != null) {
+        HashMap<String, String> fieldMap = new HashMap<>();
 
-      return fieldMap;
-    } else {
-      return null;
+        fieldMap.put("client_id", clientId);
+        fieldMap.put("client_secret", clientSecret);
+        fieldMap.put("code", code);
+        fieldMap.put("grant_type", GrantType.AUTH_CODE);
+        fieldMap.put("redirect_uri", redirectUri);
+
+        return fieldMap;
+      }
     }
-  }
 
+    return null;
+  }
 
   /**
    * Describes the method used to give the app permission to make authenticated requests.
@@ -158,11 +161,10 @@ public abstract class SoundCloudAuthenticator {
      * Asynchronously obtains an OAuth Token.
      *
      * @param authMap An {@link Map} defining form-urlencoded auth parameters.
-     *
      * @return the call that can be run to access the API resource.
      */
-    @FormUrlEncoded
-    @POST("oauth2/token") Call<AuthenticationResponse> authorize(@FieldMap Map<String, String> authMap);
+    @FormUrlEncoded @POST("oauth2/token") Call<AuthenticationResponse> authorize(
+        @FieldMap Map<String, String> authMap);
   }
 
   /**
@@ -173,12 +175,10 @@ public abstract class SoundCloudAuthenticator {
    */
   public final AuthService getAuthService() {
     if (service == null) {
-      OkHttpClient client = new OkHttpClient.Builder()
-          .addInterceptor(new AuthInterceptor())
-          .build();
+      OkHttpClient client =
+          new OkHttpClient.Builder().addInterceptor(new AuthInterceptor()).build();
 
-      Retrofit adapter = new Retrofit.Builder()
-          .client(client)
+      Retrofit adapter = new Retrofit.Builder().client(client)
           .baseUrl(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT)
           .addConverterFactory(GsonConverterFactory.create())
           .build();
@@ -194,14 +194,10 @@ public abstract class SoundCloudAuthenticator {
 
       Request request = chain.request();
 
-      HttpUrl url = request.url()
-          .newBuilder()
-          .addEncodedQueryParameter("client_id", clientId)
-          .build();
+      HttpUrl url =
+          request.url().newBuilder().addEncodedQueryParameter("client_id", clientId).build();
 
-      Request newRequest = request.newBuilder()
-          .url(url)
-          .build();
+      Request newRequest = request.newBuilder().url(url).build();
 
       return chain.proceed(newRequest);
     }
