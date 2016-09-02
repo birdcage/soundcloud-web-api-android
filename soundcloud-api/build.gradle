@@ -170,6 +170,6 @@ bintray {
   pkg.version {
     name = version
     released = new Date()
-    vcsTag = version
+    vcsTag = "v${VERSION_NUMBER}"
   }
 }
