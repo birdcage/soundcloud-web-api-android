@@ -25,16 +25,13 @@
 package com.jlubecki.soundcloud.webapi.android;
 
 import com.jlubecki.soundcloud.webapi.android.models.Comment;
-import com.jlubecki.soundcloud.webapi.android.models.Comments;
 import com.jlubecki.soundcloud.webapi.android.models.Connection;
-import com.jlubecki.soundcloud.webapi.android.models.Connections;
 import com.jlubecki.soundcloud.webapi.android.models.Group;
 import com.jlubecki.soundcloud.webapi.android.models.Groups;
 import com.jlubecki.soundcloud.webapi.android.models.Playlist;
 import com.jlubecki.soundcloud.webapi.android.models.SecretToken;
 import com.jlubecki.soundcloud.webapi.android.models.Track;
 import com.jlubecki.soundcloud.webapi.android.models.User;
-import com.jlubecki.soundcloud.webapi.android.models.Users;
 import com.jlubecki.soundcloud.webapi.android.models.WebProfile;
 
 import java.util.HashMap;
@@ -61,7 +58,7 @@ public interface SoundCloudService {
      */
 
     /**
-     * Returns a list of {@link Track} items from a given query.
+     * Returns a call that can provide a list of {@link Track} items from a given query.
      *
      * @param query The phrase by which to search for tracks.
      * @return The call that can be used to get the data.
@@ -70,7 +67,7 @@ public interface SoundCloudService {
     Call<List<Track>> searchTracks(@Query("q") String query);
 
     /**
-     * Returns a list of {@link Track} items from a given set of query parameters.
+     * Returns a call that can provide a list of {@link Track} items from a given set of query parameters.
      * <p/>
      * <ul>
      * <li>q - string to search for</li>
@@ -104,7 +101,7 @@ public interface SoundCloudService {
     Call<Track> getTrack(@Path("id") String trackId);
 
     /**
-     * Get {@link Comments} for a given track ID.
+     * Get a list {@link Comment} items for a given track ID.
      *
      * @param trackId ID of track.
      * @return The call that can be used to get the data.
@@ -120,11 +117,10 @@ public interface SoundCloudService {
      * @return The call that can be used to get the data.
      */
     @GET("tracks/{id}/comments/{comment-id}")
-    Call<Comment> getTrackComment(
-            @Path("id") String trackId, @Path("comment-id") String commentId);
+    Call<Comment> getTrackComment(@Path("id") String trackId, @Path("comment-id") String commentId);
 
     /**
-     * Returns a {@link Users} who favorited a track.
+     * Returns a call that can provide a {@link User}s who favorited a track.
      *
      * @param trackId of the track to get favoriters from.
      * @return The call that can be used to get the data.
@@ -133,7 +129,7 @@ public interface SoundCloudService {
     Call<List<User>> getTrackFavoriters(@Path("id") String trackId);
 
     /**
-     * Returns a {@link User} with a given ID who favorited a track with a given ID.
+     * Returns a call that can provide a {@link User} with a given ID who favorited a track with a given ID.
      *
      * @param trackId ID of the track to get the favoriter from.
      * @param userId  ID of the user who favorited the track.
@@ -161,7 +157,7 @@ public interface SoundCloudService {
      */
 
     /**
-     * Returns a list of {@link Users} from a given query.
+     * Returns a call that can provide a list of {@link User}s from a given query.
      *
      * @param query The phrase by which to search for users.
      * @return The call that can be used to get the data.
@@ -179,7 +175,7 @@ public interface SoundCloudService {
     Call<User> getUser(@Path("id") String userId);
 
     /**
-     * Returns a list of {@link Track} items for a user with a given ID.
+     * Returns a call that can provide a list of {@link Track} items for a user with a given ID.
      *
      * @param userId ID for the user to get tracks for.
      * @return The call that can be used to get the data.
@@ -188,7 +184,7 @@ public interface SoundCloudService {
     Call<List<Track>> getUserTracks(@Path("id") String userId);
 
     /**
-     * Returns a list of {@link Playlist} objects for a user with a given ID.
+     * Returns a call that can provide a list of {@link Playlist} objects for a user with a given ID.
      *
      * @param userId ID for the user to get playlists for.
      * @return The call that can be used to get the data.
@@ -197,7 +193,7 @@ public interface SoundCloudService {
     Call<List<Playlist>> getUserPlaylists(@Path("id") String userId);
 
     /**
-     * Returns {@link Users} followed by a user with a given ID.
+     * Returns {@link User}s followed by a user with a given ID.
      *
      * @param userId ID of the user to get the followings for.
      * @return The call that can be used to get the data.
@@ -206,18 +202,17 @@ public interface SoundCloudService {
     Call<List<User>> getUserFollowings(@Path("id") String userId);
 
     /**
-     * Returns a {@link User} with a given ID followed by another user with a given ID.
+     * Returns a call that can provide a {@link User} with a given ID followed by another user with a given ID.
      *
      * @param userId         ID of the user to get list of followed users from.
      * @param followedUserId ID of the followed user.
      * @return The call that can be used to get the data.
      */
     @GET("users/{id}/followings/{following-id}")
-    Call<User> getUserFollowing(
-            @Path("id") String userId, @Path("following-id") String followedUserId);
+    Call<User> getUserFollowing(@Path("id") String userId, @Path("following-id") String followedUserId);
 
     /**
-     * Returns {@link Users} followed by a user with a given ID.
+     * Returns {@link User}s followed by a user with a given ID.
      *
      * @param userId ID of a user to get the followers for.
      * @return The call that can be used to get the data.
@@ -226,18 +221,17 @@ public interface SoundCloudService {
     Call<List<User>> getUserFollowers(@Path("id") String userId);
 
     /**
-     * Returns a {@link User} followed by a user with a given ID.
+     * Returns a call that can provide a {@link User} followed by a user with a given ID.
      *
      * @param userId     ID of the user to get the follower for.
      * @param followerId ID of the follower.
      * @return The call that can be used to get the data.
      */
     @GET("users/{id}/followers/{follower-id}")
-    Call<User> getUserFollower(@Path("id") String userId,
-                               @Path("follower-id") String followerId);
+    Call<User> getUserFollower(@Path("id") String userId, @Path("follower-id") String followerId);
 
     /**
-     * Returns {@link Comments} for a user with a given ID.
+     * Returns a call that can provide a list of {@link Comment} items for a user with a given ID.
      *
      * @param userId ID of the user to get comments for.
      * @return The call that can be used to get the data.
@@ -246,7 +240,7 @@ public interface SoundCloudService {
     Call<List<Comment>> getUserComments(@Path("id") String userId);
 
     /**
-     * Returns a favorited list of {@link Track} items for a user with a given ID.
+     * Returns a call that can provide a favorited list of {@link Track} items for a user with a given ID.
      *
      * @param userId ID of the user to get favorites for.
      * @return The call that can be used to get the data.
@@ -255,7 +249,7 @@ public interface SoundCloudService {
     Call<List<Track>> getUserFavorites(@Path("id") String userId);
 
     /**
-     * Returns a favorited {@link Track} for a user with a given ID.
+     * Returns a call that can provide a favorited {@link Track} for a user with a given ID.
      *
      * @param userId     ID of the user.
      * @param favoriteId ID of the track in the user's favorites.
@@ -266,7 +260,7 @@ public interface SoundCloudService {
                                 @Path("favorite-id") String favoriteId);
 
     /**
-     * Returns a {@link Groups} that a user with a given ID is a part of.
+     * Returns a call that can provide a {@link Groups} that a user with a given ID is a part of.
      *
      * @param userId ID of the user.
      * @return The call that can be used to get the data.
@@ -275,7 +269,7 @@ public interface SoundCloudService {
     Call<List<Group>> getUserGroups(@Path("id") String userId);
 
     /**
-     * Returns a list of {@link WebProfile} objects that describe a user with a given ID.
+     * Returns a call that can provide a list of {@link WebProfile} objects that describe a user with a given ID.
      *
      * @param userId ID of the user.
      * @return The call that can be used to get the data.
@@ -292,7 +286,7 @@ public interface SoundCloudService {
      */
 
     /**
-     * Returns a list of {@link Playlist} items based on a given query.
+     * Returns a call that can provide a list of {@link Playlist} items based on a given query.
      *
      * @param query The phrase by which to search for playlists.
      * @return The call that can be used to get the data.
@@ -301,7 +295,7 @@ public interface SoundCloudService {
     Call<List<Playlist>> getPlaylists(@Query("q") String query);
 
     /**
-     * Returns a list of {@link Playlist} items based on a given query with a representation parameter.
+     * Returns a call that can provide a list of {@link Playlist} items based on a given query with a representation parameter.
      *
      * @param query          The phrase by which to search for playlists.
      * @param representation Accepted values: "compact" or "id"
@@ -311,7 +305,7 @@ public interface SoundCloudService {
     Call<List<Playlist>> getPlaylists(@Query("q") String query, @Query("representation") String representation);
 
     /**
-     * Returns a secret token for a {@link Playlist}.
+     * Returns a call that can provide a secret token for a {@link Playlist}.
      *
      * @param id ID of the playlist to get the token for.
      * @return The call that can be used to get the data.
@@ -337,7 +331,7 @@ public interface SoundCloudService {
     Call<List<Group>> searchGroups(@Query("q") String query);
 
     /**
-     * Returns a {@link Group} with a given ID.
+     * Returns a call that can provide a {@link Group} with a given ID.
      *
      * @param id ID of the group to get.
      * @return The call that can be used to get the data.
@@ -346,7 +340,7 @@ public interface SoundCloudService {
     Call<Group> getGroup(@Path("id") String id);
 
     /**
-     * Returns {@link Users} that moderate a group with a given ID.
+     * Returns a list of {@link User} items that moderate a group with a given ID.
      *
      * @param id ID of the group to get moderators for.
      * @return The call that can be used to get the data.
@@ -355,7 +349,7 @@ public interface SoundCloudService {
     Call<List<User>> getGroupModerators(@Path("id") String id);
 
     /**
-     * Returns {@link Users} that are in a group with a given ID.
+     * Provides a list of {@link User} items that are in a group with a given ID.
      *
      * @param id ID of the group to get members for.
      * @return The call that can be used to get the data.
@@ -364,7 +358,7 @@ public interface SoundCloudService {
     Call<List<User>> getGroupMembers(@Path("id") String id);
 
     /**
-     * Returns {@link Users} that contribute to a group with a given ID.
+     * Provides a list of {@link User} items that contribute to a group with a given ID.
      *
      * @param id ID of the group to get contributors for.
      * @return The call that can be used to get the data.
@@ -373,7 +367,7 @@ public interface SoundCloudService {
     Call<List<User>> getGroupContributors(@Path("id") String id);
 
     /**
-     * Returns all {@link Users} that are associated with a group with a given ID.
+     * Returns a call that can provide all {@link User}s that are associated with a group with a given ID.
      *
      * @param id ID of the group to get all users for.
      * @return The call that can be used to get the data.
@@ -382,7 +376,7 @@ public interface SoundCloudService {
     Call<List<User>> getGroupUsers(@Path("id") String id);
 
     /**
-     * Returns a list of {@link Track} objects that were submitted to a group with a given ID, but have not yet been
+     * Returns a call that can provide a list of {@link Track} objects that were submitted to a group with a given ID, but have not yet been
      * approved.
      *
      * @param id ID of the group to get pending tracks for.
@@ -393,7 +387,7 @@ public interface SoundCloudService {
             @Path("id") String id);
 
     /**
-     * Returns a {@link Track} that was submitted to a group with a given ID, but has not yet been
+     * Returns a call that can provide a {@link Track} that was submitted to a group with a given ID, but has not yet been
      * approved.
      *
      * @param id      ID of the group to get a pending track for.
@@ -405,7 +399,7 @@ public interface SoundCloudService {
             @Path("id") String id, @Path("pending-id") String trackId);
 
     /**
-     * Returns a list of {@link Track} objects that were contributed to a group with a given ID. For moderators.
+     * Returns a call that can provide a list of {@link Track} objects that were contributed to a group with a given ID. For moderators.
      *
      * @param id ID of the group to get pending tracks for.
      * @return The call that can be used to get the data.
@@ -414,7 +408,7 @@ public interface SoundCloudService {
     Call<List<Track>> getGroupContributions(@Path("id") String id);
 
     /**
-     * Returns a {@link Track} that was contributed to a group with a given ID. For moderators.
+     * Returns a call that can provide a {@link Track} that was contributed to a group with a given ID. For moderators.
      *
      * @param id      ID of the group to get a contribution for.
      * @param trackId ID of the contribution.
@@ -440,7 +434,7 @@ public interface SoundCloudService {
     Call<User> getMe();
 
     /**
-     * Returns a list of {@link Track} items for the authenticated user.
+     * Returns a call that can provide a list of {@link Track} items for the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -448,7 +442,7 @@ public interface SoundCloudService {
     Call<List<Track>> getMyTracks();
 
     /**
-     * Returns a list of {@link Playlist} items for the authenticated user.
+     * Returns a call that can provide a list of {@link Playlist} items for the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -456,7 +450,7 @@ public interface SoundCloudService {
     Call<List<Playlist>> getMyPlaylists();
 
     /**
-     * Returns {@link Users} followed by the authenticated user.
+     * Returns {@link User}s followed by the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -464,7 +458,7 @@ public interface SoundCloudService {
     Call<List<User>> getMyFollowings();
 
     /**
-     * Returns a {@link User} followed by the authenticated user.
+     * Returns a call that can provide a {@link User} followed by the authenticated user.
      *
      * @param followedUserId ID of the followed user.
      * @return The call that can be used to get the data.
@@ -473,7 +467,7 @@ public interface SoundCloudService {
     Call<User> getMyFollowing(@Path("following-id") String followedUserId);
 
     /**
-     * Returns {@link Users} followed by the authenticated user.
+     * Returns a call that provides a list of {@link User} items followed by the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -481,17 +475,16 @@ public interface SoundCloudService {
     Call<List<User>> getMyFollowers();
 
     /**
-     * Returns a {@link User} followed by the authenticated user.
+     * Returns a call that can provide a {@link User} followed by the authenticated user.
      *
      * @param followerId ID of the follower.
      * @return The call that can be used to get the data.
      */
     @GET("me/followers/{follower-id}")
-    Call<User> getMyFollower(
-            @Path("follower-id") String followerId);
+    Call<User> getMyFollower(@Path("follower-id") String followerId);
 
     /**
-     * Returns {@link Comments} for the authenticated user.
+     * Returns a call that can provide a list of {@link Comment} items for the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -499,7 +492,7 @@ public interface SoundCloudService {
     Call<List<Comment>> getMyComments();
 
     /**
-     * Returns a list of favorited {@link Track} items for the authenticated user.
+     * Returns a call that can provide a list of favorited {@link Track} items for the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -507,17 +500,16 @@ public interface SoundCloudService {
     Call<List<Track>> getMyFavorites();
 
     /**
-     * Returns a favorited {@link Track} for the authenticated user.
+     * Returns a call that can provide a favorited {@link Track} for the authenticated user.
      *
      * @param favoriteId ID of the track in the user's favorites.
      * @return The call that can be used to get the data.
      */
     @GET("me/favorites/{favorite-id}")
-    Call<List<Track>> getMyFavorite(
-            @Path("favorite-id") String favoriteId);
+    Call<List<Track>> getMyFavorite(@Path("favorite-id") String favoriteId);
 
     /**
-     * Returns a list of groups that the authenticated user is a part of.
+     * Returns a call that can provide a list of groups that the authenticated user is a part of.
      *
      * @return The call that can be used to get the data.
      */
@@ -525,7 +517,7 @@ public interface SoundCloudService {
     Call<List<Group>> getMyGroups();
 
     /**
-     * Returns a list of web profiles that the authenticated user has.
+     * Returns a call that can provide a list of web profiles that the authenticated user has.
      *
      * @return The call that can be used to get the data.
      */
@@ -533,7 +525,7 @@ public interface SoundCloudService {
     Call<List<WebProfile>> getMyWebProfiles();
 
     /**
-     * Returns {@link Connections} for the authenticated user.
+     * Returns a call that can provide a list of {@link Connection} items for the authenticated user.
      *
      * @return The call that can be used to get the data.
      */
@@ -541,7 +533,7 @@ public interface SoundCloudService {
     Call<List<Connection>> getMyConnections();
 
     /**
-     * Returns a {@link Connection} for the authenticated user.
+     * Returns a call that can provide a {@link Connection} for the authenticated user.
      *
      * @param connectionId ID of the connection.
      * @return The call that can be used to get the data.
