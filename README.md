@@ -9,7 +9,7 @@ Add following to the `build.gradle` file in your app:
 
 ```groovy
 dependencies {
-    compile 'com.jlubecki.soundcloud:soundcloud-api:1.1.1'
+    compile 'com.jlubecki.soundcloud:soundcloud-api:1.2.0-SNAPSHOT'
 
     // Other dependencies
 }
@@ -50,45 +50,6 @@ soundcloud.getTrack("trackId").enqueue(new Callback<Track>() {
 });
 ```
 
-
-It is also possible to construct the adapter with custom parameters.
-
-```java
-final String clientId = "id";
-final String accessToken = "token";
-
-OkHttpClient client = new OkHttpClient.Builder()
-    .addInterceptor(new Interceptor() {
-        @Override 
-        public Response intercept(Chain chain) throws IOException {
-             Request request = chain.request();
-        
-             HttpUrl url = request.url()
-                 .newBuilder()
-                 .addEncodedQueryParameter("client_id", clientId)
-                 .addEncodedQueryParameter("token", accessToken)
-                 .build();
-        
-             Request newRequest = request.newBuilder()
-                 .url(url)
-                 .build();
-        
-             return chain.proceed(newRequest);
-        }
-    })
-    .build();
-
-Retrofit adapter = new Retrofit.Builder()
-    .client(client)
-    .baseUrl(SoundCloudAPI.SOUNDCLOUD_API_ENDPOINT)
-    .addConverterFactory(GsonConverterFactory.create())
-    .build();
-
-service = adapter.create(SoundCloudService.class);
-
-SoundCloudService soundcloud = adapter.create(SoundCloudService.class);
-```
-
 ### Authentication
 
 The provided implementations of the SoundCloudAuthenticator class make 
@@ -98,57 +59,38 @@ To setup login:
 
 ```java
 
-private AuthenticationCallback authCallback = new AuthenticationCallback() {
-        @Override
-        public void onReadyToAuthenticate() {
-            // Tabs Authenticator is ready when this is called
-        }
-    
-        @Override
-        public void onAuthenticationEnded() {
-            Log.i(TAG, "Auth ended.");
-        }
-    };
+private AuthenticationStrategy strategy;
 
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     
-    ...
-
-    // Prepare browser auth, ready to launch instantly
-    browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
-
-    // or...
+    // ...
     
-    // Prepare Chrome Tabs auth, ready to launch based on authCallback
-    AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(authCallback);
-    tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
-}
+    AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() { ... });
 
-@Override 
-protected void onStart() {
-    super.onStart();
-
-    // The documentation for Chrome Custom Tabs recommends preparing the
-    // Custom Tab in onStart.
+    ChromeTabsSoundCloudAuthenticicator tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
+    BrowserSoundCloudAuthenticator browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+    WebViewSoundCloudAuthenticator webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
     
-    if(tabsAuthenticator != null) {
-        boolean ok = tabsAuthenticator.prepareAuthenticationFlow();
-
-        Log.i(TAG, "Tab auth did connect: " + ok);
-    }
+    // You need to create a strategy in `onCreate` to make sure it is always available to handle new Intent data in `onResume`
+    strategy = new AuthenticationStrategy.Builder(MainActivity.this)
+            .addAuthenticators(activeAuthenticators)
+            .setCheckNetwork(true)
+            .onFailure(new AuthenticationStrategy.OnNetworkFailureListener() {
+                @Override
+                public void onFailure(Throwable throwable) {
+                    // Couldn't connect to the internet...
+                }
+            })
+            .build();
 }
 ```
 
 When ready to launch the authentication flow:
 
 ```java
-browserAuthenticator.launchAuthenticationFlow();
-
-// or...
-
-tabsAuthenticator.launchAuthenticationFlow();
+    strategy.authenticate();
 ```
 
 Once the user has given the application permission to authenticate on 
@@ -181,25 +123,55 @@ would look like:
 A sample implementation of code to handle an intent.
 
 ```java
-void authenticateWithIntent(Intent intent) {
-    super.onNewIntent(intent);
-    
-    if(intent.getDataString().startsWith("redirect")) {
-        HashMap<String, String> authMap = 
-            SoundCloudAuthenticator.handleResponse(intent, "redirect", "clientId", "secret"); 
-            
-        SoundCloudAuthenticator.AuthService service = someAuthenticator.getAuthService();
-        service.authorize(authMap).enqueue(new Callback<AuthenticationResponse>() {
+void getTokenFromIntent(Intent intent) {
+    if (strategy.canAuthenticate(intent)) {
+        strategy.getToken(intent, CLIENT_SECRET, new AuthenticationStrategy.ResponseCallback() {
             @Override
-            public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
-                // See if the response succeeded and has a token
+            public void onAuthenticationResponse(AuthenticationResponse response) {
+                switch (response.getType()) {
+                    case TOKEN:
+                        Log.i(TAG, "Token: " + response.access_token); // save token
+                        break;
+
+                    default:
+                        Log.e(TAG, response.toString());
+                        break;
+                }
             }
 
-            @Override 
-            public void onFailure(Call<AuthenticationResponse> call, Throwable t) 
-                // See what went wrong
+            @Override
+            public void onAuthenticationFailed(Throwable throwable) {
+                Log.e(TAG, throwable.getMessage());
             }
         });
+    }
+}
+```
+
+A few changes to the activity lifecycle to handle incoming intents:
+
+```java
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    setIntent(intent);
+}
+
+// Always called after `onNewIntent`, if not using ChromeTabs, you can
+// call `getTokenFromIntent` in `onNewIntent`.
+@Override
+protected void onResume() {
+    super.onResume();
+    getTokenFromIntent(getIntent());
+}
+
+// Use with `WebViewSoundCloudAuthenticator`.
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+
+    if (requestCode == YOUR_REQUEST_CODE) {
+        getTokenFromIntent(data);
     }
 }
 ```
@@ -223,6 +195,13 @@ For instance:
 and `tabsAuthenticator.setTabsIntentBuilder(builder)`.
 - Improve loading times of the authentication flow (built in to the `AuthTabServiceConnection`).
 - Add callbacks to observe simple navigation events to understand the authentication flow.
+
+#### WebView Based Notes
+
+The WebView authenticator is possibly the easiest to use. However, you expose yourself to 
+security vulnerabilities because it enables javascript (i.e. XSS attacks). A potential upside is
+that the WebView will never try to open the SoundCloud app during the authentication (if it does, 
+let me know).
 
 
 ### Other Info

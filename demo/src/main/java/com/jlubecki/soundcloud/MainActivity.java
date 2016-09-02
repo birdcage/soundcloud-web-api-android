@@ -32,18 +32,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckedTextView;
 
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationStrategy;
-import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.browser.BrowserSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.AuthTabServiceConnection;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
 import com.jlubecki.soundcloud.webapi.android.auth.webview.WebViewSoundCloudAuthenticator;
-
-import java.util.ArrayList;
 
 import static com.jlubecki.soundcloud.Constants.AUTH_TOKEN_KEY;
 import static com.jlubecki.soundcloud.Constants.CLIENT_ID;
@@ -65,13 +61,29 @@ public class MainActivity extends AppCompatActivity {
     private WebViewSoundCloudAuthenticator webViewAuthenticator;
 
     private AuthenticationStrategy strategy;
-    private ArrayList<SoundCloudAuthenticator> activeAuthenticators = new ArrayList<>();
+    private AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
+        @Override
+        public void onReadyToAuthenticate() {
+            int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+            int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
+
+            // Customize Chrome Tabs
+            CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
+                    .setToolbarColor(toolbarColor)
+                    .setSecondaryToolbarColor(secondaryToolbarColor);
+
+            tabsAuthenticator.setTabsIntentBuilder(builder);
+        }
+
+        @Override
+        public void onAuthenticationEnded() {
+            Log.i(TAG, "Auth ended.");
+        }
+    });
 
     // Views
-    private CheckedTextView chromeTabAuthCheckedText;
-    private CheckedTextView browserCheckedText;
-    private CheckedTextView webViewAuthCheckedText;
     private Button launchAuthButton;
+    private Button openPlayerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,45 +91,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_layout);
 
         // Prepare views
-        browserCheckedText = (CheckedTextView) findViewById(R.id.ctv_browser_auth);
-        chromeTabAuthCheckedText = (CheckedTextView) findViewById(R.id.ctv_chrome_auth);
-        webViewAuthCheckedText = (CheckedTextView) findViewById(R.id.ctv_wv_auth);
         launchAuthButton = (Button) findViewById(R.id.btn_begin_auth);
+        openPlayerButton = (Button) findViewById(R.id.btn_skip_auth);
 
         // Prepare auth methods
-
-        AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(
-                new AuthenticationCallback() {
-                    @Override
-                    public void onReadyToAuthenticate() {
-                        int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
-                        int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
-
-                        // Customize Chrome Tabs
-                        CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
-                                .setToolbarColor(toolbarColor)
-                                .setSecondaryToolbarColor(secondaryToolbarColor);
-
-                        tabsAuthenticator.setTabsIntentBuilder(builder);
-
-                        if (chromeTabAuthCheckedText != null) {
-                            chromeTabAuthCheckedText.setEnabled(true);
-                        }
-                    }
-
-                    @Override
-                    public void onAuthenticationEnded() {
-                        Log.i(TAG, "Auth ended.");
-                    }
-                });
 
         tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
         browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
         webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
 
-        chromeTabAuthCheckedText.setEnabled(tabsAuthenticator.prepareAuthenticationFlow());
-        browserCheckedText.setEnabled(browserAuthenticator.prepareAuthenticationFlow());
-        webViewAuthCheckedText.setEnabled(webViewAuthenticator.prepareAuthenticationFlow());
+        strategy = new AuthenticationStrategy.Builder(this)
+                .addAuthenticator(tabsAuthenticator)
+                .addAuthenticator(browserAuthenticator)
+                .addAuthenticator(webViewAuthenticator)
+                .setCheckNetwork(true)
+                .build();
 
         setupClickListeners();
     }
@@ -125,7 +113,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        getTokenFromIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getTokenFromIntent(getIntent());
     }
 
     @Override
@@ -155,64 +149,17 @@ public class MainActivity extends AppCompatActivity {
     // region Helper
 
     void setupClickListeners() {
-        browserCheckedText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                browserCheckedText.setChecked(!browserCheckedText.isChecked());
-
-                if (browserCheckedText.isChecked()) {
-                    activeAuthenticators.add(browserAuthenticator);
-                } else {
-                    activeAuthenticators.remove(browserAuthenticator);
-                }
-            }
-        });
-
-        chromeTabAuthCheckedText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chromeTabAuthCheckedText.setChecked(!chromeTabAuthCheckedText.isChecked());
-
-                if (chromeTabAuthCheckedText.isChecked()) {
-                    activeAuthenticators.add(tabsAuthenticator);
-                } else {
-                    activeAuthenticators.remove(tabsAuthenticator);
-                }
-            }
-        });
-
-        webViewAuthCheckedText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                webViewAuthCheckedText.setChecked(!webViewAuthCheckedText.isChecked());
-                if (webViewAuthCheckedText.isChecked()) {
-                    activeAuthenticators.add(webViewAuthenticator);
-                } else {
-                    activeAuthenticators.remove(webViewAuthenticator);
-                }
-            }
-        });
-
         launchAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AuthenticationStrategy.Builder builder = new AuthenticationStrategy.Builder(MainActivity.this);
-
-                for (SoundCloudAuthenticator authenticator : activeAuthenticators) {
-                    builder.addAuthenticator(authenticator);
-                }
-
-                strategy = builder
-                        .setCheckNetwork(true)
-                        .onFailure(new AuthenticationStrategy.OnNetworkFailureListener() {
-                            @Override
-                            public void onFailure(Throwable throwable) {
-                                Log.e(TAG, throwable.getMessage());
-                            }
-                        })
-                        .build();
-
                 strategy.authenticate();
+            }
+        });
+
+        openPlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openPlayer();
             }
         });
     }
@@ -221,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         String intentInfo = intent != null ? intent.getDataString() : "Null";
         Log.i(TAG, "Trying to get token from intent data: " + intentInfo);
 
-        if (strategy.canAuthenticate(intent)) {
+        if (strategy != null && strategy.canAuthenticate(intent)) {
             strategy.getToken(intent, CLIENT_SECRET, new AuthenticationStrategy.ResponseCallback() {
                 @Override
                 public void onAuthenticationResponse(AuthenticationResponse response) {

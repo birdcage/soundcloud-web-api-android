@@ -51,18 +51,18 @@ public class AuthenticationStrategy {
     private final Context context;
     private OnNetworkFailureListener onNetworkFailureListener;
     private boolean shouldCheckNetwork = false;
-    private SoundCloudAuthenticator currentAuthenticator;
+    private SoundCloudAuthenticator authenticator;
 
     private AuthenticationStrategy(@NonNull Context context,
                                    @NonNull List<SoundCloudAuthenticator> authenticators) {
         this.context = context;
         this.authenticators = authenticators;
+
+        chooseAuthenticator();
     }
 
     public void authenticate() {
         if (shouldCheckNetwork && !networkIsConnected()) return;
-
-        SoundCloudAuthenticator authenticator = updateCurrentAuthenticator();
 
         if (authenticator != null) {
             authenticator.launchAuthenticationFlow();
@@ -79,14 +79,15 @@ public class AuthenticationStrategy {
     }
 
     public boolean canAuthenticate(Intent intent) {
-        return currentAuthenticator != null && currentAuthenticator.canAuthenticate(intent);
+        return authenticator != null &&
+                authenticator.canAuthenticate(intent);
     }
 
     public void getToken(Intent intent, String clientSecret, final ResponseCallback callback) {
-        Map<String, String> authMap = currentAuthenticator.handleResponse(intent, clientSecret);
+        Map<String, String> authMap = authenticator.handleResponse(intent, clientSecret);
 
         if (authMap != null) {
-            currentAuthenticator.getAuthService()
+            authenticator.getAuthService()
                     .authorize(authMap)
                     .enqueue(new Callback<AuthenticationResponse>() {
                         @Override
@@ -135,18 +136,16 @@ public class AuthenticationStrategy {
         return isConnected;
     }
 
-    private SoundCloudAuthenticator updateCurrentAuthenticator() {
-        this.currentAuthenticator = null;
+    private void chooseAuthenticator() {
+        this.authenticator = null;
 
         for (SoundCloudAuthenticator authenticator : authenticators) {
             if (authenticator.prepareAuthenticationFlow()) {
-                this.currentAuthenticator = authenticator;
+                this.authenticator = authenticator;
 
-                break;
+                return;
             }
         }
-
-        return this.currentAuthenticator;
     }
 
     public static class Builder {
@@ -163,6 +162,12 @@ public class AuthenticationStrategy {
 
         public Builder addAuthenticator(SoundCloudAuthenticator authenticator) {
             authenticators.add(authenticator);
+
+            return this;
+        }
+
+        public Builder addAuthenticators(List<SoundCloudAuthenticator> authenticators) {
+            this.authenticators.addAll(authenticators);
 
             return this;
         }
@@ -194,7 +199,6 @@ public class AuthenticationStrategy {
 
     public interface ResponseCallback {
         void onAuthenticationResponse(AuthenticationResponse response);
-
         void onAuthenticationFailed(Throwable throwable);
     }
 }

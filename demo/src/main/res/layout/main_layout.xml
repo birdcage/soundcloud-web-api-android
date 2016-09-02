@@ -12,37 +12,15 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <CheckedTextView
-            android:id="@+id/ctv_chrome_auth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:padding="4dp"
-            android:text="Chrome Tab" />
-
-        <CheckedTextView
-            android:id="@+id/ctv_browser_auth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:padding="4dp"
-            android:text="Browser" />
-
-        <CheckedTextView
-            android:id="@+id/ctv_wv_auth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checkMark="?android:attr/listChoiceIndicatorMultiple"
-            android:checked="false"
-            android:padding="4dp"
-            android:text="WebView" />
-
         <Button
             android:id="@+id/btn_begin_auth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Authenticate" />
+
+        <Button android:id="@+id/btn_skip_auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open Search"/>
     </LinearLayout>
 </RelativeLayout>

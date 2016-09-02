@@ -67,33 +67,6 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
     }
 
     /**
-     * Same as {@link #ChromeTabsSoundCloudAuthenticator(String, String, Activity, AuthTabServiceConnection)}
-     * but launches the ChromeTab as soon as the Service Connection is established.
-     *
-     * @param clientId    Client ID of the application requesting authorization.
-     * @param redirectUri Redirect URI of the application requesting authorization
-     * @param context     Activity from which authentication is being launched.
-     */
-    public ChromeTabsSoundCloudAuthenticator(String clientId, String redirectUri, Activity context) {
-        super(clientId, redirectUri);
-
-        this.context = context;
-        this.serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
-            @Override
-            public void onReadyToAuthenticate() {
-                launchAuthenticationFlow();
-            }
-
-            @Override
-            public void onAuthenticationEnded() {
-                // Do nothing.
-            }
-        });
-
-        this.browserPackageName = CustomTabsClient.getPackageName(context, null);
-    }
-
-    /**
      * Attempts to bind a CustomTabsServiceConnection that will notify the user when the authentication
      * is ready and when the connection is ended.
      *
