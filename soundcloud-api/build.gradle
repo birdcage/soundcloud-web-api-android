@@ -24,81 +24,94 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven-publish'
 
 group = GROUP
 version = VERSION_NAME
 
+
+Properties properties = new Properties()
+def fileName = "${BASE_NAME}-${version}.aar"
+def bintrayProperties = project.rootProject.file('bintray.properties')
+def user
+def key
+
+if (bintrayProperties.exists()) {
+    properties.load(bintrayProperties.newDataInputStream())
+
+    user = properties.getProperty("BINTRAY_USER")
+    key = properties.getProperty("BINTRAY_KEY")
+}
+
 android {
-  compileSdkVersion 24
-  buildToolsVersion "24.0.1"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
 
-  defaultConfig {
-    minSdkVersion 16
-    targetSdkVersion 24
-    versionName version
-  }
-
-  buildTypes {
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 24
+        versionName version
     }
-  }
 
-  lintOptions {
-    abortOnError false
-  }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
-  // android
-  compile 'com.android.support:appcompat-v7:24.2.0'
-  compile 'com.android.support:customtabs:24.2.0'
+    // android
+    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:customtabs:24.2.0'
 
-  // retrofit
-  compile 'com.squareup.retrofit2:retrofit:2.1.0'
-  compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-  compile 'com.squareup.okhttp3:okhttp:3.3.1'
+    // retrofit
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
 }
-
 
 // Project Archive Binaries
 
 task sourcesJar(type: Jar) {
-  from android.sourceSets.main.java.srcDirs
-  classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
-  source = android.sourceSets.main.java.srcDirs
-  classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-  classpath += configurations.compile
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
 
-  failOnError false
+    failOnError false
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from javadoc.destinationDir
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 android.libraryVariants.all { variant ->
-  variant.outputs.each { output ->
-    def outputFile = output.outputFile
+    variant.outputs.each { output ->
+        def outputFile = output.outputFile
 
-    if (outputFile != null && outputFile.name.endsWith('.aar')) {
-      def fileName = "${BASE_NAME}-${version}.aar"
-      output.outputFile = new File(outputFile.parent, fileName)
+        if (outputFile != null && outputFile.name.endsWith('.aar')) {
+            output.outputFile = new File(outputFile.parent, fileName)
+        }
     }
-  }
 }
 
 artifacts {
-  archives javadocJar
-  archives sourcesJar
+    archives javadocJar
+    archives sourcesJar
 }
-
 
 // Bintray Maven upload
 
@@ -107,69 +120,88 @@ def gitUrl = 'https://github.com/birdcage/soundcloud-web-api-android.git'
 def issueUrl = 'https://github.com/birdcage/soundcloud-web-api-android/issues'
 
 install {
-  repositories.mavenInstaller {
-    pom.project {
-      packaging 'aar'
+    repositories.mavenInstaller {
+        pom.project {
+            packaging 'aar'
 
-      name 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
-      url siteUrl
+            name 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
+            url siteUrl
 
-      licenses {
-        license {
-          name 'The MIT License'
-          url 'https://opensource.org/licenses/MIT'
+            licenses {
+                license {
+                    name 'The MIT License'
+                    url 'https://opensource.org/licenses/MIT'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'jacoblubecki'
+                    name 'Jacob Lubecki'
+                    email 'jacoblubecki@gmail.com'
+                }
+            }
+
+            scm {
+                connection gitUrl
+                developerConnection gitUrl
+                url siteUrl
+            }
         }
-      }
-
-      developers {
-        developer {
-          id 'jacoblubecki'
-          name 'Jacob Lubecki'
-          email 'jacoblubecki@gmail.com'
-        }
-      }
-
-      scm {
-        connection gitUrl
-        developerConnection gitUrl
-        url siteUrl
-      }
     }
-  }
 }
 
 bintray {
-  Properties properties = new Properties()
-  def bintrayProperties = project.rootProject.file('bintray.properties')
+    configurations = ['archives']
 
-  if(bintrayProperties.exists()) {
-    properties.load(bintrayProperties.newDataInputStream())
+    pkg {
+        repo = 'maven'
+        name = 'soundcloud-web-api-android'
+        desc = 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
 
-    user = properties.getProperty("BINTRAY_USER")
-    key = properties.getProperty("BINTRAY_KEY")
-  }
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        issueTrackerUrl = issueUrl
 
-  configurations = ['archives']
+        licenses = ["MIT"]
 
-  pkg {
-    repo = 'maven'
-    name = 'soundcloud-web-api-android'
-    desc = 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
+        publicDownloadNumbers = true
 
-    websiteUrl = siteUrl
-    vcsUrl = gitUrl
-    issueTrackerUrl = issueUrl
+        labels = ['birdcage', 'soundcloud', 'API', 'Android', 'Java']
+    }
 
-    licenses = ["MIT"]
+    pkg.version {
+        name = version
+        released = new Date()
+        vcsTag = "v${VERSION_NUMBER}"
+    }
+}
 
-    publicDownloadNumbers = true
+artifactory {
+    contextUrl = "${ARTIFACTORY_CONTEXT}"
 
-    labels = ['birdcage', 'soundcloud', 'API', 'Android', 'Java']
-  }
+    publish {
+        repository {
+            // The Artifactory repository key to publish to
+            repoKey = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
+            username = user // The publisher user name
+            password = key // The publisher password
+            maven = true
+        }
+        defaults {
+            publishArtifacts = true
+            publishConfigs('archives')
+            publishPom = true //Publish generated POM files to Artifactory (true by default)
+            publishIvy = false
+            //Publish generated Ivy descriptor files to Artifactory (true by default)
+        }
+    }
 
-  pkg.version {
-    name = version
-    released = new Date()
-    vcsTag = "v${VERSION_NUMBER}"
-  }
+    resolve {
+        repository {
+            repoKey = 'jcenter'
+            username = user // The resolver user name
+            password = key // The resolver password
+        }
+    }
 }

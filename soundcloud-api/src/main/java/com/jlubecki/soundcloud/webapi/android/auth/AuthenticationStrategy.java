@@ -199,6 +199,7 @@ public class AuthenticationStrategy {
 
     public interface ResponseCallback {
         void onAuthenticationResponse(AuthenticationResponse response);
+
         void onAuthenticationFailed(Throwable throwable);
     }
 }
