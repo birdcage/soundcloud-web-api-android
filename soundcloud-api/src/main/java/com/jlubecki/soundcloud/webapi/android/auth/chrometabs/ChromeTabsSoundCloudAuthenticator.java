@@ -45,7 +45,7 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
 
     private final Activity context;
     private final String browserPackageName;
-    private final AuthTabServiceConnection serviceConnection;
+    private AuthTabServiceConnection serviceConnection;
 
     private CustomTabsIntent.Builder tabsIntentBuilder;
 
@@ -55,14 +55,11 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
      * @param clientId          Client ID of the application requesting authorization.
      * @param redirectUri       Redirect URI of the application requesting authorization
      * @param context           Activity from which authentication is being launched.
-     * @param serviceConnection A Service Connection that establishes a relationship between the
-     *                          Chrome Custom Tab and the authenticating application.
      */
-    public ChromeTabsSoundCloudAuthenticator(String clientId, String redirectUri, Activity context, AuthTabServiceConnection serviceConnection) {
+    public ChromeTabsSoundCloudAuthenticator(String clientId, String redirectUri, Activity context) {
         super(clientId, redirectUri);
 
         this.context = context;
-        this.serviceConnection = serviceConnection;
         this.browserPackageName = CustomTabsClient.getPackageName(context, null);
     }
 
@@ -73,11 +70,19 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
      * @return whether or not the CustomTabsClient could bind the Service.
      */
     @Override
-    public boolean prepareAuthenticationFlow() {
+    public boolean prepareAuthenticationFlow(final AuthenticationCallback callback) {
+        serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
+            @Override
+            public void onReadyToAuthenticate(SoundCloudAuthenticator authenticator) {
+                callback.onReadyToAuthenticate(ChromeTabsSoundCloudAuthenticator.this);
+            }
+        });
         serviceConnection.setClientAuthUrl(loginUrl());
 
-        return browserPackageName != null &&
+        boolean canAuthenticate = browserPackageName != null &&
                 CustomTabsClient.bindCustomTabsService(context, browserPackageName, serviceConnection);
+
+        return canAuthenticate;
     }
 
     /**
@@ -109,13 +114,17 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
     /**
      * Gets a Builder that will allow a user to define the look and feel of the Custom Tab that handles
      * the authentication flow. Should only be called after an {@link AuthenticationCallback} notifies
-     * that the authentication is ready to begin with {@link AuthenticationCallback#onReadyToAuthenticate()}.
+     * that the authentication is ready to begin with {@link AuthenticationCallback#onReadyToAuthenticate(SoundCloudAuthenticator)} )}.
      *
      * @return a builder that can be passed back to {@link #setTabsIntentBuilder(CustomTabsIntent.Builder)}
      * when it has been customized as desired.
      */
     public CustomTabsIntent.Builder newTabsIntentBuilder() {
-        CustomTabsSession tabsSession = serviceConnection.getSession();
+        CustomTabsSession tabsSession = null;
+
+        if(serviceConnection != null) {
+            tabsSession = serviceConnection.getSession();
+        }
 
         return new CustomTabsIntent.Builder(tabsSession);
     }
@@ -125,6 +134,8 @@ public class ChromeTabsSoundCloudAuthenticator extends SoundCloudAuthenticator {
      * needed.
      */
     public void unbindService() {
-        context.unbindService(serviceConnection);
+        if(serviceConnection != null) {
+            context.unbindService(serviceConnection);
+        }
     }
 }

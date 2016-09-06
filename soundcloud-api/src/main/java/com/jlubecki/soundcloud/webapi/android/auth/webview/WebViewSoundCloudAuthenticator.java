@@ -27,6 +27,7 @@ package com.jlubecki.soundcloud.webapi.android.auth.webview;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
 import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 
 /**
@@ -51,7 +52,9 @@ public class WebViewSoundCloudAuthenticator extends SoundCloudAuthenticator {
     }
 
     @Override
-    public boolean prepareAuthenticationFlow() {
+    public boolean prepareAuthenticationFlow(AuthenticationCallback callback) {
+        callback.onReadyToAuthenticate(this);
+
         // WebView should always be available...
         return true;
     }

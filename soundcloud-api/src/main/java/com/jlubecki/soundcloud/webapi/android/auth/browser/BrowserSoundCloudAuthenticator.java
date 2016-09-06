@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 
+import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
 import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 
 import java.util.List;
@@ -69,9 +70,15 @@ public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
      * @return true
      */
     @Override
-    public boolean prepareAuthenticationFlow() {
+    public boolean prepareAuthenticationFlow(AuthenticationCallback callback) {
         // Make sure the intent can be launched by an application.
-        return context.getPackageManager().queryIntentActivities(launchIntent, 0).size() > 0;
+        boolean canAuthenticate = context.getPackageManager().queryIntentActivities(launchIntent, 0).size() > 0;
+
+        if(canAuthenticate) {
+            callback.onReadyToAuthenticate(this);
+        }
+
+        return canAuthenticate;
     }
 
     /**

@@ -78,10 +78,10 @@ public abstract class SoundCloudAuthenticator {
      *
      * @return true if the method was able to execute all necessary preparation steps.
      */
-    public abstract boolean prepareAuthenticationFlow();
+    protected abstract boolean prepareAuthenticationFlow(AuthenticationCallback callback);
 
     /**
-     * Method which should handle launching the authentication flow.
+     * Method which should handle launching the authentication flow once it is prepared.
      */
     public abstract void launchAuthenticationFlow();
 

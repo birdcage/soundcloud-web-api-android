@@ -53,29 +53,19 @@ public class AuthenticationStrategy {
     private boolean shouldCheckNetwork = false;
     private SoundCloudAuthenticator authenticator;
 
-    private AuthenticationStrategy(@NonNull Context context,
-                                   @NonNull List<SoundCloudAuthenticator> authenticators) {
+    private AuthenticationStrategy(@NonNull Context context, @NonNull List<SoundCloudAuthenticator> authenticators) {
         this.context = context;
         this.authenticators = authenticators;
-
-        chooseAuthenticator();
     }
 
-    public void authenticate() {
-        if (shouldCheckNetwork && !networkIsConnected()) return;
+    public boolean authenticate(AuthenticationCallback callback) {
+        if (shouldCheckNetwork && !networkIsConnected()) return false; // Not connected to the internet.
 
-        if (authenticator != null) {
-            authenticator.launchAuthenticationFlow();
-        } else {
-            String errorReason = "No authentication strategy could be prepared.";
-
-            if (onNetworkFailureListener != null) {
-                AssertionError error = new AssertionError(errorReason);
-                onNetworkFailureListener.onFailure(error);
-            } else {
-                Log.e(TAG, errorReason);
-            }
+        for(SoundCloudAuthenticator authenticator : authenticators) {
+            if(authenticator.prepareAuthenticationFlow(callback)) return true; // Prepared successfully. Will execute callback.
         }
+
+        return false;
     }
 
     public boolean canAuthenticate(Intent intent) {
@@ -134,18 +124,6 @@ public class AuthenticationStrategy {
         }
 
         return isConnected;
-    }
-
-    private void chooseAuthenticator() {
-        this.authenticator = null;
-
-        for (SoundCloudAuthenticator authenticator : authenticators) {
-            if (authenticator.prepareAuthenticationFlow()) {
-                this.authenticator = authenticator;
-
-                return;
-            }
-        }
     }
 
     public static class Builder {

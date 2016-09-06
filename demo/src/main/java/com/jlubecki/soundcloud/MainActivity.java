@@ -35,8 +35,8 @@ import android.widget.Button;
 
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationStrategy;
+import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.browser.BrowserSoundCloudAuthenticator;
-import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.AuthTabServiceConnection;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
 import com.jlubecki.soundcloud.webapi.android.auth.webview.WebViewSoundCloudAuthenticator;
@@ -47,6 +47,7 @@ import static com.jlubecki.soundcloud.Constants.CLIENT_SECRET;
 import static com.jlubecki.soundcloud.Constants.PREFS_NAME;
 import static com.jlubecki.soundcloud.Constants.REDIRECT;
 
+@SuppressWarnings("FieldCanBeLocal")
 public class MainActivity extends AppCompatActivity {
 
     // Logging
@@ -61,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
     private WebViewSoundCloudAuthenticator webViewAuthenticator;
 
     private AuthenticationStrategy strategy;
-    private AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
+    private AuthenticationCallback callback = new AuthenticationCallback() {
         @Override
-        public void onReadyToAuthenticate() {
+        public void onReadyToAuthenticate(SoundCloudAuthenticator authenticator) {
             int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
             int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
 
@@ -73,13 +74,10 @@ public class MainActivity extends AppCompatActivity {
                     .setSecondaryToolbarColor(secondaryToolbarColor);
 
             tabsAuthenticator.setTabsIntentBuilder(builder);
-        }
 
-        @Override
-        public void onAuthenticationEnded() {
-            Log.i(TAG, "Auth ended.");
+            authenticator.launchAuthenticationFlow();
         }
-    });
+    };
 
     // Views
     private Button launchAuthButton;
@@ -96,15 +94,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Prepare auth methods
 
-        tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
+        tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
         browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
         webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
 
         strategy = new AuthenticationStrategy.Builder(this)
-                .addAuthenticator(tabsAuthenticator)
-                .addAuthenticator(browserAuthenticator)
-                .addAuthenticator(webViewAuthenticator)
-                .setCheckNetwork(true)
+                .addAuthenticator(tabsAuthenticator) // Tries this first
+                .addAuthenticator(browserAuthenticator) // Then tries this
+                .addAuthenticator(webViewAuthenticator) // Finally tries this
+                .setCheckNetwork(true) // Makes sure the internet is connected first.
                 .build();
 
         setupClickListeners();
@@ -152,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
         launchAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                strategy.authenticate();
+                strategy.authenticate(callback);
             }
         });
 
@@ -189,8 +187,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.e(TAG, throwable.getMessage());
                 }
             });
-        } else {
-            Log.w(TAG, "Token could not be obtained from intent.");
         }
     }
 

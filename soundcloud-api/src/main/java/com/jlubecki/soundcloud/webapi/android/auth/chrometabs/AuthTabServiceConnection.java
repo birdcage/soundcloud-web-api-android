@@ -40,7 +40,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Jacob on 6/22/16.
  */
-public class AuthTabServiceConnection extends CustomTabsServiceConnection {
+class AuthTabServiceConnection extends CustomTabsServiceConnection {
 
     private final WeakReference<AuthenticationCallback> authCallbackReference;
     private final WeakReference<CustomTabsCallback> navCallbackReference;
@@ -48,12 +48,12 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
     private CustomTabsSession tabsSession;
     private String clientAuthUrl;
 
-    public AuthTabServiceConnection(@NonNull AuthenticationCallback callback) {
+    protected AuthTabServiceConnection(@NonNull AuthenticationCallback callback) {
         this.authCallbackReference = new WeakReference<>(callback);
         this.navCallbackReference = new WeakReference<>(null);
     }
 
-    public AuthTabServiceConnection(@NonNull AuthenticationCallback authenticationCallback, @Nullable CustomTabsCallback navigationCallback) {
+    protected AuthTabServiceConnection(@NonNull AuthenticationCallback authenticationCallback, @Nullable CustomTabsCallback navigationCallback) {
         this.authCallbackReference = new WeakReference<>(authenticationCallback);
         this.navCallbackReference = new WeakReference<>(navigationCallback);
     }
@@ -73,7 +73,7 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
 
         AuthenticationCallback callback = authCallbackReference.get();
         if (callback != null) {
-            callback.onReadyToAuthenticate();
+            callback.onReadyToAuthenticate(null);
         }
     }
 
@@ -81,11 +81,6 @@ public class AuthTabServiceConnection extends CustomTabsServiceConnection {
     public void onServiceDisconnected(ComponentName componentName) {
         tabsClient = null;
         tabsSession = null;
-
-        AuthenticationCallback callback = authCallbackReference.get();
-        if (callback != null) {
-            callback.onAuthenticationEnded();
-        }
     }
 
     public void setClientAuthUrl(String authUrl) {

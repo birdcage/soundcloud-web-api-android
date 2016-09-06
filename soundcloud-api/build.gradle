@@ -31,23 +31,9 @@ apply plugin: 'maven-publish'
 group = GROUP
 version = VERSION_NAME
 
-
-Properties properties = new Properties()
-def fileName = "${BASE_NAME}-${version}.aar"
-def bintrayProperties = project.rootProject.file('bintray.properties')
-def user
-def key
-
-if (bintrayProperties.exists()) {
-    properties.load(bintrayProperties.newDataInputStream())
-
-    user = properties.getProperty("BINTRAY_USER")
-    key = properties.getProperty("BINTRAY_KEY")
-}
-
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         minSdkVersion 16
@@ -78,130 +64,6 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.3.1'
 }
 
-// Project Archive Binaries
+// Library Artifacts
 
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-
-    failOnError false
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-android.libraryVariants.all { variant ->
-    variant.outputs.each { output ->
-        def outputFile = output.outputFile
-
-        if (outputFile != null && outputFile.name.endsWith('.aar')) {
-            output.outputFile = new File(outputFile.parent, fileName)
-        }
-    }
-}
-
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
-// Bintray Maven upload
-
-def siteUrl = 'https://github.com/birdcage/soundcloud-web-api-android'
-def gitUrl = 'https://github.com/birdcage/soundcloud-web-api-android.git'
-def issueUrl = 'https://github.com/birdcage/soundcloud-web-api-android/issues'
-
-install {
-    repositories.mavenInstaller {
-        pom.project {
-            packaging 'aar'
-
-            name 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
-            url siteUrl
-
-            licenses {
-                license {
-                    name 'The MIT License'
-                    url 'https://opensource.org/licenses/MIT'
-                }
-            }
-
-            developers {
-                developer {
-                    id 'jacoblubecki'
-                    name 'Jacob Lubecki'
-                    email 'jacoblubecki@gmail.com'
-                }
-            }
-
-            scm {
-                connection gitUrl
-                developerConnection gitUrl
-                url siteUrl
-            }
-        }
-    }
-}
-
-bintray {
-    configurations = ['archives']
-
-    pkg {
-        repo = 'maven'
-        name = 'soundcloud-web-api-android'
-        desc = 'A Java wrapper for the SoundCloud Web API, optimized for use with the Android SDK.'
-
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
-        issueTrackerUrl = issueUrl
-
-        licenses = ["MIT"]
-
-        publicDownloadNumbers = true
-
-        labels = ['birdcage', 'soundcloud', 'API', 'Android', 'Java']
-    }
-
-    pkg.version {
-        name = version
-        released = new Date()
-        vcsTag = "v${VERSION_NUMBER}"
-    }
-}
-
-artifactory {
-    contextUrl = "${ARTIFACTORY_CONTEXT}"
-
-    publish {
-        repository {
-            // The Artifactory repository key to publish to
-            repoKey = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
-            username = user // The publisher user name
-            password = key // The publisher password
-            maven = true
-        }
-        defaults {
-            publishArtifacts = true
-            publishConfigs('archives')
-            publishPom = true //Publish generated POM files to Artifactory (true by default)
-            publishIvy = false
-            //Publish generated Ivy descriptor files to Artifactory (true by default)
-        }
-    }
-
-    resolve {
-        repository {
-            repoKey = 'jcenter'
-            username = user // The resolver user name
-            password = key // The resolver password
-        }
-    }
-}
+apply from: project.file('maven_publish.gradle')
