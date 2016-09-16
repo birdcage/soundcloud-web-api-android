@@ -85,6 +85,12 @@ public abstract class SoundCloudAuthenticator {
      */
     public abstract void launchAuthenticationFlow();
 
+    /**
+     * Override this method to deallocate any resources or release an implementation of a
+     * SoundCloudAuthenticator. For an example, see {@link com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator}.
+     */
+    public void release() { }
+
     protected final String loginUrl() {
         return "https://www.soundcloud.com/connect?" +
                 "client_id=" + clientId +

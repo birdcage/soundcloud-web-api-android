@@ -58,7 +58,7 @@ public class AuthenticationStrategy {
         this.authenticators = authenticators;
     }
 
-    public boolean authenticate(AuthenticationCallback callback) {
+    public boolean beginAuthentication(AuthenticationCallback callback) {
         if (shouldCheckNetwork && !networkIsConnected()) return false; // Not connected to the internet.
 
         for(SoundCloudAuthenticator authenticator : authenticators) {

@@ -23,10 +23,6 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'maven-publish'
 
 group = GROUP
 version = VERSION_NAME
@@ -55,8 +51,8 @@ android {
 
 dependencies {
     // android
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:customtabs:24.2.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:customtabs:24.2.1'
 
     // retrofit
     compile 'com.squareup.retrofit2:retrofit:2.1.0'

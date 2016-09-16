@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Created by Jacob on 6/23/16.
  * <p/>
- * Used to authenticate SoundCloud via an installed Browser on the user's device.
+ * Used to beginAuthentication SoundCloud via an installed Browser on the user's device.
  */
 public class BrowserSoundCloudAuthenticator extends SoundCloudAuthenticator {
 

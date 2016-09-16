@@ -5,11 +5,24 @@ It uses [Retrofit](http://square.github.io/retrofit/) to create Java interfaces 
 
 ## Integration into your project
 
-Add following to the `build.gradle` file in your app:
+In the main `build.gradle` file:
+
+```groovy
+repositories {
+    jcenter() // For production builds.
+    maven {
+      url 'http://oss.jfrog.org/artifactory/oss-snapshot-local' // For snapshots.
+    }
+}
+```
+
+Snapshots can be found on [JFrog's Open Source Artifactory Server](https://oss.jfrog.org/libs-snapshot/com/jlubecki/soundcloud/soundcloud-api/).
+
+Add following to the `build.gradle` file in your app module:
 
 ```groovy
 dependencies {
-    compile 'com.jlubecki.soundcloud:soundcloud-api:1.2.0-SNAPSHOT'
+    compile 'com.jlubecki.soundcloud:soundcloud-api:1.2.0'
 
     // Other dependencies
 }
@@ -69,13 +82,15 @@ protected void onCreate(Bundle savedInstanceState) {
     
     AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() { ... });
 
-    ChromeTabsSoundCloudAuthenticicator tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
+    ChromeTabsSoundCloudAuthenticator tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
     BrowserSoundCloudAuthenticator browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
     WebViewSoundCloudAuthenticator webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
     
     // You need to create a strategy in `onCreate` to make sure it is always available to handle new Intent data in `onResume`
     strategy = new AuthenticationStrategy.Builder(MainActivity.this)
-            .addAuthenticators(activeAuthenticators)
+            .addAuthenticator(tabsAuthenticator)
+            .addAuthenticator(browserAuthenticator)
+            .addAuthenticator(webViewAuthenticator)
             .setCheckNetwork(true)
             .onFailure(new AuthenticationStrategy.OnNetworkFailureListener() {
                 @Override
@@ -84,13 +99,15 @@ protected void onCreate(Bundle savedInstanceState) {
                 }
             })
             .build();
-}
-```
-
-When ready to launch the authentication flow:
-
-```java
-    strategy.authenticate();
+            
+    strategy.beginAuthentication(new AuthenticationCallback() {
+        @Override
+        public void onReadyToAuthenticate(SoundCloudAuthenticator authenticator) {
+            authenticator.launchAuthenticationwhereFlow(); // launch immediately
+            // ... or ...
+            MyActivity.this.authenticator = authenticator; // save to launch when ready
+        }
+    });
 ```
 
 Once the user has given the application permission to authenticate on 
@@ -201,7 +218,7 @@ and `tabsAuthenticator.setTabsIntentBuilder(builder)`.
 The WebView authenticator is possibly the easiest to use. However, you expose yourself to 
 security vulnerabilities because it enables javascript (i.e. XSS attacks). A potential upside is
 that the WebView will never try to open the SoundCloud app during the authentication (if it does, 
-let me know).
+open an issue).
 
 
 ### Other Info

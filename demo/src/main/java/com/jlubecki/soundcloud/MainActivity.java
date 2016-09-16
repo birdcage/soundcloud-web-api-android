@@ -47,7 +47,6 @@ import static com.jlubecki.soundcloud.Constants.CLIENT_SECRET;
 import static com.jlubecki.soundcloud.Constants.PREFS_NAME;
 import static com.jlubecki.soundcloud.Constants.REDIRECT;
 
-@SuppressWarnings("FieldCanBeLocal")
 public class MainActivity extends AppCompatActivity {
 
     // Logging
@@ -57,25 +56,28 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_AUTHENTICATE = 1337;
 
     // Variables
-    private BrowserSoundCloudAuthenticator browserAuthenticator;
-    private ChromeTabsSoundCloudAuthenticator tabsAuthenticator;
-    private WebViewSoundCloudAuthenticator webViewAuthenticator;
+    private SoundCloudAuthenticator mAuthenticator;
 
     private AuthenticationStrategy strategy;
     private AuthenticationCallback callback = new AuthenticationCallback() {
         @Override
         public void onReadyToAuthenticate(SoundCloudAuthenticator authenticator) {
-            int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
-            int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
 
             // Customize Chrome Tabs
-            CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
-                    .setToolbarColor(toolbarColor)
-                    .setSecondaryToolbarColor(secondaryToolbarColor);
+            if(authenticator instanceof ChromeTabsSoundCloudAuthenticator) {
+                int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+                int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
 
-            tabsAuthenticator.setTabsIntentBuilder(builder);
+                ChromeTabsSoundCloudAuthenticator tabsAuthenticator = (ChromeTabsSoundCloudAuthenticator) authenticator;
+                CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
+                        .setToolbarColor(toolbarColor)
+                        .setSecondaryToolbarColor(secondaryToolbarColor);
 
-            authenticator.launchAuthenticationFlow();
+                tabsAuthenticator.setTabsIntentBuilder(builder);
+            }
+
+            mAuthenticator = authenticator;
+            launchAuthButton.setEnabled(true);
         }
     };
 
@@ -92,11 +94,13 @@ public class MainActivity extends AppCompatActivity {
         launchAuthButton = (Button) findViewById(R.id.btn_begin_auth);
         openPlayerButton = (Button) findViewById(R.id.btn_skip_auth);
 
+        launchAuthButton.setEnabled(false);
+
         // Prepare auth methods
 
-        tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
-        browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
-        webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
+        ChromeTabsSoundCloudAuthenticator tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+        BrowserSoundCloudAuthenticator browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+        WebViewSoundCloudAuthenticator webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
 
         strategy = new AuthenticationStrategy.Builder(this)
                 .addAuthenticator(tabsAuthenticator) // Tries this first
@@ -104,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
                 .addAuthenticator(webViewAuthenticator) // Finally tries this
                 .setCheckNetwork(true) // Makes sure the internet is connected first.
                 .build();
+
+        strategy.beginAuthentication(callback);
 
         setupClickListeners();
     }
@@ -137,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onDestroy() {
-        if (tabsAuthenticator != null) {
-            tabsAuthenticator.unbindService();
+        if(mAuthenticator != null) {
+            mAuthenticator.release(); // Need to call this if using Chrome Tabs.
         }
 
         super.onDestroy();
@@ -150,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         launchAuthButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                strategy.authenticate(callback);
+                mAuthenticator.launchAuthenticationFlow();
             }
         });
 
