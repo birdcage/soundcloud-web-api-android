@@ -31,8 +31,8 @@ apply plugin: 'maven-publish'
 
 Properties properties = new Properties()
 def bintrayProperties = project.rootProject.file('bintray.properties')
-def user
-def key
+def bintrayUser
+def apiKey
 
 def siteUrl = 'https://github.com/birdcage/soundcloud-web-api-android'
 def gitUrl = 'https://github.com/birdcage/soundcloud-web-api-android.git'
@@ -41,8 +41,8 @@ def issueUrl = 'https://github.com/birdcage/soundcloud-web-api-android/issues'
 if (bintrayProperties.exists()) {
     properties.load(bintrayProperties.newDataInputStream())
 
-    user = properties.getProperty("BINTRAY_USER")
-    key = properties.getProperty("BINTRAY_KEY")
+    bintrayUser = properties.getProperty("BINTRAY_USER")
+    apiKey = properties.getProperty("BINTRAY_KEY")
 }
 
 
@@ -120,6 +120,8 @@ install {
 // jcenter
 
 bintray {
+    user = bintrayUser
+    key = apiKey
     configurations = ['archives']
 
     pkg {
@@ -154,8 +156,8 @@ artifactory {
         repository {
             // The Artifactory repository key to publish to
             repoKey = version.endsWith('SNAPSHOT') ? 'oss-snapshot-local' : 'oss-release-local'
-            username = user // The publisher user name
-            password = key // The publisher password
+            username = bintrayUser // The publisher user name
+            password = apiKey // The publisher password
             maven = true
         }
         defaults {
@@ -170,8 +172,8 @@ artifactory {
     resolve {
         repository {
             repoKey = 'jcenter'
-            username = user // The resolver user name
-            password = key // The resolver password
+            username = bintrayUser // The resolver user name
+            password = apiKey // The resolver password
         }
     }
 }
