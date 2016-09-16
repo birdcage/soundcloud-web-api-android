@@ -33,28 +33,28 @@ package com.jlubecki.soundcloud.webapi.android.models;
  */
 public class CreatorApp {
 
-  /**
-   * ID of app used to create a sound.
-   */
-  public String id;
+    /**
+     * ID of app used to create a sound.
+     */
+    public String id;
 
-  /**
-   * API resource url.
-   */
-  public String uri;
+    /**
+     * API resource url.
+     */
+    public String uri;
 
-  /**
-   * SoundCloud url to user.
-   */
-  public String permalink_url;
+    /**
+     * SoundCloud url to user.
+     */
+    public String permalink_url;
 
-  /**
-   * External url to app page.
-   */
-  public String external_url;
+    /**
+     * External url to app page.
+     */
+    public String external_url;
 
-  /**
-   * Creator's user name.
-   */
-  public String creator;
+    /**
+     * Creator's user name.
+     */
+    public String creator;
 }

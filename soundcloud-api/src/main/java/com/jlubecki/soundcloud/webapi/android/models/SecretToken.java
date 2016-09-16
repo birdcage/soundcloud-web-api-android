@@ -29,11 +29,11 @@ package com.jlubecki.soundcloud.webapi.android.models;
  */
 public class SecretToken {
 
-  public String kind;
+    public String kind;
 
-  public String token;
+    public String token;
 
-  public String uri;
+    public String uri;
 
-  public String resource_uri;
+    public String resource_uri;
 }

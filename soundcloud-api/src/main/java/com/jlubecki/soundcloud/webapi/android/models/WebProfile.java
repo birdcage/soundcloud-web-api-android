@@ -29,17 +29,17 @@ package com.jlubecki.soundcloud.webapi.android.models;
  */
 public class WebProfile {
 
-  private String kind;
+    private String kind;
 
-  private String id;
+    private String id;
 
-  private String service;
+    private String service;
 
-  private String title;
+    private String title;
 
-  private String url;
+    private String url;
 
-  private String username;
+    private String username;
 
-  private String created_at;
+    private String created_at;
 }

@@ -25,6 +25,5 @@
 package com.jlubecki.soundcloud.webapi.android.auth;
 
 public interface AuthenticationCallback {
-    void onReadyToAuthenticate();
-    void onAuthenticationEnded();
-  }
+    void onReadyToAuthenticate(SoundCloudAuthenticator authenticator);
+}

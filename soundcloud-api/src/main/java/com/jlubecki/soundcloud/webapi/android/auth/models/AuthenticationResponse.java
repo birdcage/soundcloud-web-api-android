@@ -31,30 +31,41 @@ package com.jlubecki.soundcloud.webapi.android.auth.models;
  */
 public class AuthenticationResponse {
 
-  public static final String TOKEN = "access_token";
-  public static final String ERROR = "error";
-  public static final String UNKNOWN = "unknown";
+    public String access_token;
 
-  public String access_token;
+    public String scope;
 
-  public String scope;
+    public String error;
 
-  public String error;
+    /**
+     * Helper method to determine authentication response type.
+     *
+     * @return The type of the authentication response.
+     */
+    public ResponseType getType() {
+        if (access_token != null) {
+            return ResponseType.TOKEN;
+        }
 
-  /**
-   * Helper method to determine authentication response type.
-   *
-   * @return The type of the authentication response.
-   */
-  public String getType() {
-    if (access_token != null) {
-      return TOKEN;
+        if (error != null) {
+            return ResponseType.ERROR;
+        }
+
+        return ResponseType.UNKNOWN;
     }
 
-    if (error != null) {
-      return ERROR;
+    public enum ResponseType {
+        TOKEN,
+        ERROR,
+        UNKNOWN
     }
 
-    return UNKNOWN;
-  }
+    @Override
+    public String toString() {
+        return "AuthenticationResponse{" +
+                "access_token='" + access_token + '\'' +
+                ", scope='" + scope + '\'' +
+                ", error='" + error + '\'' +
+                '}';
+    }
 }

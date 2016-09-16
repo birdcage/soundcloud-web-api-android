@@ -24,27 +24,22 @@
 
 package com.jlubecki.soundcloud;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.ColorRes;
 import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
 import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationCallback;
+import com.jlubecki.soundcloud.webapi.android.auth.AuthenticationStrategy;
 import com.jlubecki.soundcloud.webapi.android.auth.SoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.browser.BrowserSoundCloudAuthenticator;
-import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.AuthTabServiceConnection;
 import com.jlubecki.soundcloud.webapi.android.auth.chrometabs.ChromeTabsSoundCloudAuthenticator;
 import com.jlubecki.soundcloud.webapi.android.auth.models.AuthenticationResponse;
-import java.util.HashMap;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.jlubecki.soundcloud.webapi.android.auth.webview.WebViewSoundCloudAuthenticator;
 
 import static com.jlubecki.soundcloud.Constants.AUTH_TOKEN_KEY;
 import static com.jlubecki.soundcloud.Constants.CLIENT_ID;
@@ -57,140 +52,180 @@ public class MainActivity extends AppCompatActivity {
     // Logging
     private static final String TAG = "MainActivity";
 
-    private BrowserSoundCloudAuthenticator browserAuthenticator;
-    private ChromeTabsSoundCloudAuthenticator tabsAuthenticator;
-    private boolean tabsDidConnect = false;
+    // Constants
+    private static final int REQUEST_CODE_AUTHENTICATE = 1337;
 
-    private Button chromeTabAuthButton;
+    // Variables
+    private SoundCloudAuthenticator mAuthenticator;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    private AuthenticationStrategy strategy;
+    private AuthenticationCallback callback = new AuthenticationCallback() {
+        @Override
+        public void onReadyToAuthenticate(SoundCloudAuthenticator authenticator) {
+
+            // Customize Chrome Tabs
+            if(authenticator instanceof ChromeTabsSoundCloudAuthenticator) {
+                int toolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorPrimary);
+                int secondaryToolbarColor = ContextCompat.getColor(MainActivity.this, R.color.colorAccent);
+
+                ChromeTabsSoundCloudAuthenticator tabsAuthenticator = (ChromeTabsSoundCloudAuthenticator) authenticator;
+                CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
+                        .setToolbarColor(toolbarColor)
+                        .setSecondaryToolbarColor(secondaryToolbarColor);
+
+                tabsAuthenticator.setTabsIntentBuilder(builder);
+            }
+
+            mAuthenticator = authenticator;
+            launchAuthButton.setEnabled(true);
+        }
+    };
+
+    // Views
+    private Button launchAuthButton;
+    private Button openPlayerButton;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
 
         // Prepare views
-        Button browserAuthButton = (Button) findViewById(R.id.btn_browser_auth);
-        chromeTabAuthButton = (Button) findViewById(R.id.btn_chrome_auth);
-        chromeTabAuthButton.setEnabled(false);
+        launchAuthButton = (Button) findViewById(R.id.btn_begin_auth);
+        openPlayerButton = (Button) findViewById(R.id.btn_skip_auth);
+
+        launchAuthButton.setEnabled(false);
 
         // Prepare auth methods
-        browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
 
-        browserAuthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                browserAuthenticator.launchAuthenticationFlow();
-            }
-        });
+        ChromeTabsSoundCloudAuthenticator tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+        BrowserSoundCloudAuthenticator browserAuthenticator = new BrowserSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this);
+        WebViewSoundCloudAuthenticator webViewAuthenticator = new WebViewSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, REQUEST_CODE_AUTHENTICATE);
 
-        AuthTabServiceConnection serviceConnection = new AuthTabServiceConnection(new AuthenticationCallback() {
-            @Override
-            public void onReadyToAuthenticate() {
+        strategy = new AuthenticationStrategy.Builder(this)
+                .addAuthenticator(tabsAuthenticator) // Tries this first
+                .addAuthenticator(browserAuthenticator) // Then tries this
+                .addAuthenticator(webViewAuthenticator) // Finally tries this
+                .setCheckNetwork(true) // Makes sure the internet is connected first.
+                .build();
 
-                // Customize Chrome Tabs
-                CustomTabsIntent.Builder builder = tabsAuthenticator.newTabsIntentBuilder()
-                    .setToolbarColor(getColorCompat(R.color.colorPrimary))
-                    .setSecondaryToolbarColor(getColorCompat(R.color.colorAccent));
+        strategy.beginAuthentication(callback);
 
-                tabsAuthenticator.setTabsIntentBuilder(builder);
-
-                if(chromeTabAuthButton != null) {
-                    chromeTabAuthButton.setEnabled(true);
-                }
-            }
-
-            @Override
-            public void onAuthenticationEnded() {
-                Log.i(TAG, "Auth ended.");
-            }
-        });
-
-        tabsAuthenticator = new ChromeTabsSoundCloudAuthenticator(CLIENT_ID, REDIRECT, this, serviceConnection);
-
-        chromeTabAuthButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                tabsAuthenticator.launchAuthenticationFlow();
-            }
-        });
+        setupClickListeners();
     }
 
-    @Override protected void onStart() {
-        super.onStart();
-
-        if(tabsAuthenticator != null) {
-            tabsDidConnect = tabsAuthenticator.prepareAuthenticationFlow();
-
-            Log.i(TAG, "Tab auth did connect: " + tabsDidConnect);
-        }
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-
-        Intent intent = getIntent();
-
-        String intentInfo = intent != null ? intent.getDataString() : "Null intent.";
-
-        Log.i(TAG, "Lifecycle method onResume with intent info: " + intentInfo);
-
-        if(intent != null && intent.getDataString() != null && intent.getDataString().contains(REDIRECT)) {
-            HashMap<String, String> authMap = SoundCloudAuthenticator.handleResponse(intent, REDIRECT, CLIENT_ID, CLIENT_SECRET);
-
-            SoundCloudAuthenticator.AuthService service = tabsAuthenticator.getAuthService(); // Method is final, varies only with clientId used to construct the authenticator
-            service.authorize(authMap).enqueue(new Callback<AuthenticationResponse>() {
-                @Override
-                public void onResponse(Call<AuthenticationResponse> call, Response<AuthenticationResponse> response) {
-                    Log.i(TAG, "Response was: " + response.raw().toString());
-
-                    AuthenticationResponse authResponse = response.body();
-
-                    if(authResponse != null) {
-                        Log.i(TAG, "Auth success -  " + authResponse.access_token);
-
-                        SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                        preferences.edit().putString(AUTH_TOKEN_KEY, authResponse.access_token).apply();
-
-                        Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Call<AuthenticationResponse> call, Throwable t) {
-                    Log.e(TAG, "Auth failure - " + t.getMessage());
-                }
-            });
-        } else {
-            Log.w(TAG, "Other new intent not handled.");
-        }
-
-
-    }
-
-    @Override protected void onNewIntent(Intent intent) {
+    @Override
+    protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
         setIntent(intent);
     }
 
-    @Override public void onDestroy() {
-        Log.i(TAG, "OnDestroy");
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getTokenFromIntent(getIntent());
+    }
 
-        if(tabsAuthenticator != null && tabsDidConnect) {
-            tabsAuthenticator.unbindService();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_CODE_AUTHENTICATE:
+                handleAuthRequestCode(requestCode, resultCode, data);
+                break;
+
+            default:
+                Log.i(TAG, "Other activity result: " + requestCode);
+                break;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if(mAuthenticator != null) {
+            mAuthenticator.release(); // Need to call this if using Chrome Tabs.
         }
 
         super.onDestroy();
     }
 
-    @SuppressLint("deprecation")
-    private int getColorCompat(@ColorRes int color) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return getColor(color);
-        } else {
-            return getResources().getColor(color);
+    // region Helper
+
+    void setupClickListeners() {
+        launchAuthButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mAuthenticator.launchAuthenticationFlow();
+            }
+        });
+
+        openPlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openPlayer();
+            }
+        });
+    }
+
+    void getTokenFromIntent(Intent intent) {
+        String intentInfo = intent != null ? intent.getDataString() : "Null";
+        Log.i(TAG, "Trying to get token from intent data: " + intentInfo);
+
+        if (strategy != null && strategy.canAuthenticate(intent)) {
+            strategy.getToken(intent, CLIENT_SECRET, new AuthenticationStrategy.ResponseCallback() {
+                @Override
+                public void onAuthenticationResponse(AuthenticationResponse response) {
+                    switch (response.getType()) {
+                        case TOKEN:
+                            saveToken(response.access_token);
+                            openPlayer();
+                            break;
+
+                        default:
+                            Log.e(TAG, response.toString());
+                            break;
+                    }
+                }
+
+                @Override
+                public void onAuthenticationFailed(Throwable throwable) {
+                    Log.e(TAG, throwable.getMessage());
+                }
+            });
         }
     }
+
+    private void handleAuthRequestCode(int requestCode, int resultCode, Intent data) {
+        if (requestCode != REQUEST_CODE_AUTHENTICATE) {
+            String error = "Code: " + requestCode + " should be: " + REQUEST_CODE_AUTHENTICATE;
+            Log.e(TAG, error);
+
+            return;
+        }
+
+        if (resultCode == RESULT_OK) {
+            getTokenFromIntent(data);
+        } else if (resultCode == RESULT_CANCELED) {
+            Log.w(TAG, "Authentication was canceled.");
+        } else {
+            Log.w(TAG, "Unhandled result code: " + resultCode);
+        }
+    }
+
+    private void saveToken(String token) {
+        Log.i(TAG, "Token saved -  " + token);
+
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                .putString(AUTH_TOKEN_KEY, token)
+                .apply();
+    }
+
+    private void openPlayer() {
+        Intent intent = new Intent(MainActivity.this, PlayerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    // endregion
 }

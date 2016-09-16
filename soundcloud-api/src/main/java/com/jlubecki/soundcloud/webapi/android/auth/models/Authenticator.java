@@ -31,13 +31,13 @@ package com.jlubecki.soundcloud.webapi.android.auth.models;
  */
 public class Authenticator {
 
-  public String client_id;
+    public String client_id;
 
-  public String client_secret;
+    public String client_secret;
 
-  public String redirect_uri;
+    public String redirect_uri;
 
-  public String grant_type;
+    public String grant_type;
 
-  public String code;
+    public String code;
 }

@@ -81,16 +81,13 @@ public class PlayerActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         final String token = preferences.getString(AUTH_TOKEN_KEY, null);
 
+        SoundCloudAPI api = new SoundCloudAPI(CLIENT_ID);
+
         if (token != null) {
-            SoundCloudAPI api = new SoundCloudAPI(CLIENT_ID);
             api.setToken(token);
-
-            soundcloud = api.getService();
-        } else {
-            finish();
-
-            return;
         }
+
+        soundcloud = api.getService();
 
         EditText searchBox = (EditText) findViewById(R.id.search_box);
         searchBox.addTextChangedListener(new TextWatcher() {

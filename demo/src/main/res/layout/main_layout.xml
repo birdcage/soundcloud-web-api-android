@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Browser"
-        android:id="@+id/btn_browser_auth" />
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chrome Tab"
-        android:id="@+id/btn_chrome_auth" />
-</LinearLayout>
+        <Button
+            android:id="@+id/btn_begin_auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Authenticate" />
+
+        <Button android:id="@+id/btn_skip_auth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open Search"/>
+    </LinearLayout>
+</RelativeLayout>
