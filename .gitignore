@@ -38,6 +38,7 @@ proguard/
 .idea/libraries
 
 # IDEA User-specific configurations
+projectFilesBackup/
 .idea/.name
 .idea/compiler.xml
 .idea/copyright/profiles_settings.xml
