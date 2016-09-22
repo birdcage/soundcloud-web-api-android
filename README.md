@@ -22,7 +22,7 @@ Add following to the `build.gradle` file in your app module:
 
 ```groovy
 dependencies {
-    compile 'com.jlubecki.soundcloud:soundcloud-api:1.2.0'
+    compile 'com.jlubecki.soundcloud:soundcloud-api:1.2.1'
 
     // Other dependencies
 }

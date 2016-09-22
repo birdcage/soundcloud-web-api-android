@@ -62,7 +62,10 @@ public class AuthenticationStrategy {
         if (shouldCheckNetwork && !networkIsConnected()) return false; // Not connected to the internet.
 
         for(SoundCloudAuthenticator authenticator : authenticators) {
-            if(authenticator.prepareAuthenticationFlow(callback)) return true; // Prepared successfully. Will execute callback.
+            if(authenticator.prepareAuthenticationFlow(callback)) {
+                this.authenticator = authenticator;
+                return true; // Prepared successfully. Will execute callback.
+            }
         }
 
         return false;
